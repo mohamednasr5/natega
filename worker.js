@@ -1,13 +1,11 @@
 /**
  * Cloudflare Worker — نتيجة الشهادة الإعدادية الدقهلية 2026
  * Multi-source fallback: Official → nezakr → natiga4dk
- * يتوافق مع index.html (snake_case fields, total/280)
  */
 
 export default {
   async fetch(request) {
 
-    // CORS preflight
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: cors() });
     }
@@ -22,35 +20,28 @@ export default {
       );
     }
 
-    // ── شغّل المصادر الـ 3 بالتوازي ──────────────────────────
     const [r1, r2, r3] = await Promise.allSettled([
       source_official(seat),
       source_nezakr(seat),
       source_natiga4dk(seat),
     ]);
 
-    const all = [r1, r2, r3];
-
-    for (const r of all) {
+    for (const r of [r1, r2, r3]) {
       if (r.status === 'fulfilled' && r.value?.ok) {
-        const { source, data } = r.value;
         return Response.json(
-          { ok: true, source, data },
+          { ok: true, source: r.value.source, data: r.value.data },
           { headers: cors() }
         );
       }
     }
 
-    // كل المصادر فشلت
     return Response.json(
       {
         ok: false,
         msg: 'السيرفر تحت ضغط — حاول مرة أخرى',
-        errors: all.map((r, i) => ({
-          source : ['official','nezakr','natiga4dk'][i],
-          reason : r.status === 'rejected'
-                    ? r.reason?.message
-                    : r.value?.msg,
+        errors: [r1, r2, r3].map((r, i) => ({
+          source: ['official', 'nezakr', 'natiga4dk'][i],
+          reason: r.status === 'rejected' ? r.reason?.message : r.value?.msg,
         })),
       },
       { status: 503, headers: cors() }
@@ -58,14 +49,14 @@ export default {
   }
 };
 
-/* ═══════════════════════════════════════════════════════════
-   المصدر 1 — الموقع الرسمي  POST → JSON
-   ══════════════════════════════════════════════════════════ */
+// ═══════════════════════════════════════════════════════════
+// المصدر 1 — الموقع الرسمي POST → JSON
+// ═══════════════════════════════════════════════════════════
 async function source_official(seat) {
   const BASE = 'https://natiga.edudk.net/P20262026/public';
 
   const res = await timeout_fetch(`${BASE}/api_result.php`, {
-    method : 'POST',
+    method: 'POST',
     headers: {
       'Content-Type'     : 'application/x-www-form-urlencoded',
       'Referer'          : `${BASE}/index.html`,
@@ -79,45 +70,35 @@ async function source_official(seat) {
   const json = await res.json();
   if (!json.ok) throw new Error(json.msg || 'رقم الجلوس غير صحيح');
 
-  // الـ API الرسمي بيرجع total من 140 (ترم واحد)
-  // الـ index.html بيعرض /280 — نضاعف لو المجموع <= 140
-  const d    = json.data;
-  const norm = normalizeOfficial(d);
-
-  return { ok: true, source: 'official', data: norm };
+  return { ok: true, source: 'official', data: normalizeOfficial(json.data) };
 }
 
 function normalizeOfficial(d) {
-  const half = Number(d.total) || 0;
   return {
-    seat_no      : String(d.seat_no   || ''),
+    seat_no      : String(d.seat_no      || ''),
     student_name : String(d.student_name || ''),
     grade_name   : String(d.grade_name   || 'الثالث الإعدادي'),
     school_name  : String(d.school_name  || ''),
     admin_name   : String(d.admin_name   || ''),
-    // درجات (ترم 2 فقط — المجموع الكلي 280 بعد جمع الترمين)
-    ar         : num(d.ar),
-    en         : num(d.en),
-    studies    : num(d.studies),
-    algebra    : num(d.algebra),
-    geometry   : num(d.geometry),
-    math_total : num(d.math_total),
-    science    : num(d.science),
-    religion   : num(d.religion),
-    art        : num(d.art),
-    computer   : num(d.computer),
-    level1     : d.level1 != null ? num(d.level1) : null,
-    level2     : d.level2 != null ? num(d.level2) : null,
-    // total: الـ index.html بيعرض /280
-    // لو الـ API بعت مجموع الترم الثاني فقط (140) — نحتاج المجموع الكلي
-    // في المرحلة دي بنبعت الـ total كما هو والـ UI هيعرضه على /280
-    total      : half,
+    ar           : num(d.ar),
+    en           : num(d.en),
+    studies      : num(d.studies),
+    algebra      : num(d.algebra),
+    geometry     : num(d.geometry),
+    math_total   : num(d.math_total),
+    science      : num(d.science),
+    religion     : num(d.religion),
+    art          : num(d.art),
+    computer     : num(d.computer),
+    level1       : d.level1 != null ? num(d.level1) : null,
+    level2       : d.level2 != null ? num(d.level2) : null,
+    total        : num(d.total),
   };
 }
 
-/* ═══════════════════════════════════════════════════════════
-   المصدر 2 — نذاكر  GET → HTML scraping
-   ══════════════════════════════════════════════════════════ */
+// ═══════════════════════════════════════════════════════════
+// المصدر 2 — نذاكر GET → HTML scraping
+// ═══════════════════════════════════════════════════════════
 async function source_nezakr(seat) {
   const res = await timeout_fetch(
     `https://natiga.nezakr.net/dakahlia/seat/${seat}/`,
@@ -134,7 +115,7 @@ async function source_nezakr(seat) {
 
   if (
     html.includes('ضغط شديد') ||
-    html.includes('لم تكتمل')  ||
+    html.includes('لم تكتمل') ||
     html.includes('أعد المحاولة')
   ) throw new Error('nezakr: ضغط شديد');
 
@@ -145,11 +126,14 @@ async function source_nezakr(seat) {
 }
 
 function scrape_nezakr(html, seat) {
-  // نذاكر بيعرض البيانات في meta tags + structured divs
-  const name   = meta(html, 'student_name') || between(html, 'class="student-name">', '<');
-  const school = meta(html, 'school_name')  || between(html, 'class="school-name">',  '<');
-  const admin  = meta(html, 'admin_name')   || between(html, 'class="admin-name">',   '<');
-  const total  = meta(html, 'total_score')  || between(html, 'class="total-score">',  '<');
+  const name   = between(html, 'class="student-name">', '<')
+               || between(html, "class='student-name'>", '<');
+  const school = between(html, 'class="school-name">',  '<')
+               || between(html, "class='school-name'>",  '<');
+  const admin  = between(html, 'class="admin-name">',   '<')
+               || between(html, "class='admin-name'>",   '<');
+  const total  = between(html, 'class="total-score">',  '<')
+               || between(html, "class='total-score'>",  '<');
 
   if (!name) return null;
 
@@ -167,16 +151,15 @@ function scrape_nezakr(html, seat) {
   };
 }
 
-/* ═══════════════════════════════════════════════════════════
-   المصدر 3 — natiga4dk  Next.js _next/data → JSON
-   ══════════════════════════════════════════════════════════ */
+// ═══════════════════════════════════════════════════════════
+// المصدر 3 — natiga4dk Next.js _next/data → JSON
+// ═══════════════════════════════════════════════════════════
 async function source_natiga4dk(seat) {
-  // جيب الـ buildId أول
   const home = await timeout_fetch('https://www.natiga4dk.net/', {
     headers: { 'User-Agent': 'Mozilla/5.0 Chrome/125' }
   }, 6000);
 
-  const homeHtml  = await home.text();
+  const homeHtml   = await home.text();
   const buildMatch = homeHtml.match(/"buildId"\s*:\s*"([^"]+)"/);
   if (!buildMatch) throw new Error('natiga4dk: buildId not found');
 
@@ -196,10 +179,9 @@ async function source_natiga4dk(seat) {
   if (!dataRes.ok) throw new Error(`natiga4dk: HTTP ${dataRes.status}`);
 
   const json = await dataRes.json();
-
-  const s = json?.pageProps?.student
-         || json?.pageProps?.result
-         || json?.pageProps?.data;
+  const s    = json?.pageProps?.student
+            || json?.pageProps?.result
+            || json?.pageProps?.data;
 
   if (!s) throw new Error('natiga4dk: no student in pageProps');
 
@@ -208,13 +190,13 @@ async function source_natiga4dk(seat) {
     source: 'natiga4dk',
     data: {
       seat_no      : String(seat),
-      student_name : s.student_name || s.name   || '',
-      grade_name   : s.grade_name   || s.grade  || 'الثالث الإعدادي',
-      school_name  : s.school_name  || s.school || '',
-      admin_name   : s.admin_name   || s.admin  || '',
-      total        : num(s.total  || s.score),
-      ar           : num(s.ar     || s.arabic),
-      en           : num(s.en     || s.english),
+      student_name : s.student_name || s.name    || '',
+      grade_name   : s.grade_name   || s.grade   || 'الثالث الإعدادي',
+      school_name  : s.school_name  || s.school  || '',
+      admin_name   : s.admin_name   || s.admin   || '',
+      total        : num(s.total    || s.score),
+      ar           : num(s.ar       || s.arabic),
+      en           : num(s.en       || s.english),
       studies      : num(s.studies),
       algebra      : num(s.algebra),
       geometry     : num(s.geometry),
@@ -229,9 +211,9 @@ async function source_natiga4dk(seat) {
   };
 }
 
-/* ═══════════════════════════════════════════════════════════
-   Utility Functions
-   ══════════════════════════════════════════════════════════ */
+// ═══════════════════════════════════════════════════════════
+// Helpers
+// ═══════════════════════════════════════════════════════════
 async function timeout_fetch(url, options = {}, ms = 8000) {
   const ctrl  = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), ms);
@@ -239,7 +221,6 @@ async function timeout_fetch(url, options = {}, ms = 8000) {
     return await fetch(url, {
       ...options,
       signal: ctrl.signal,
-      cache : 'no-store',
     });
   } finally {
     clearTimeout(timer);
@@ -255,14 +236,9 @@ function between(str, start, end) {
   return str.slice(i + start.length, j);
 }
 
-function meta(html, name) {
-  const m = html.match(new RegExp(`<meta[^>]+name=["']${name}["'][^>]+content=["']([^"']+)["']`));
-  return m ? m[1] : null;
-}
-
 function clean(str) {
   if (!str) return '';
-  return str.replace(/<[^>]+>/g, '').replace(/&amp;/g,'&').replace(/&nbsp;/g,' ').trim();
+  return str.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&nbsp;/g, ' ').trim();
 }
 
 function num(v) {
