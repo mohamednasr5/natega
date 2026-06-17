@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نتيجة الطالب</title>
+<link rel="manifest" href="manifest.json">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+
+  :root {
+    --bg: #0f1923;
+    --surface: #162030;
+    --card: #1d2d40;
+    --accent: #00c896;
+    --accent2: #0098ff;
+    --warn: #ff6b35;
+    --text: #e8f0f8;
+    --muted: #7a96b0;
+    --border: #253545;
+    --success-bg: #0a2a1e;
+    --radius: 16px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Cairo', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    background: linear-gradient(135deg, #0d1f2d 0%, #162030 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 16px 16px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+  }
+
+  .header h1 {
+    font-size: 20px;
+    font-weight: 900;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+  }
+
+  .header p {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* ===== MAIN CONTENT ===== */
+  .container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px 16px;
+  }
+
+  /* ===== SEARCH CARD ===== */
+  .search-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+
+  .search-card label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .seat-input {
+    flex: 1;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    direction: ltr;
+  }
+
+  .seat-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,200,150,0.15);
+  }
+
+  .seat-input::placeholder { color: var(--muted); font-size: 14px; }
+
+  .search-btn {
+    background: linear-gradient(135deg, var(--accent), #00a87a);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 24px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .search-btn:hover { opacity: 0.9; }
+  .search-btn:active { transform: scale(0.97); }
+  .search-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ===== TOP PROGRESS BAR ===== */
+  #topBar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2), #ff6bda);
+    z-index: 9999;
+    transition: width 0.25s ease, opacity 0.4s ease;
+    opacity: 0;
+    box-shadow: 0 0 10px var(--accent);
+  }
+
+  /* ===== LOADER (heart) ===== */
+  .loader {
+    display: none;
+    text-align: center;
+    padding: 36px 20px;
+    color: var(--muted);
+  }
+
+  .heart-loader {
+    font-size: 48px;
+    animation: heartbeat 0.7s ease-in-out infinite;
+    display: block;
+    margin-bottom: 14px;
+    filter: drop-shadow(0 0 12px rgba(255,60,80,0.6));
+  }
+
+  @keyframes heartbeat {
+    0%   { transform: scale(1);    }
+    14%  { transform: scale(1.22); }
+    28%  { transform: scale(1);    }
+    42%  { transform: scale(1.16); }
+    70%  { transform: scale(1);    }
+  }
+
+  .loader-text {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--muted);
+    animation: pulse-text 1.2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-text {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.4; }
+  }
+
+  /* ===== ERROR ===== */
+  .error-box {
+    display: none;
+    background: #2a1018;
+    border: 1px solid #6b2030;
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    color: #ff8fa3;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  /* ===== RESULT CARD ===== */
+  #result-section { display: none; }
+
+  .result-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+  }
+
+  /* Student Info Header */
+  .student-header {
+    background: linear-gradient(135deg, #0d2a1e 0%, #0d1f35 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .student-header::before {
+    content: '';
+    position: absolute;
+    top: -30px; left: -30px;
+    width: 120px; height: 120px;
+    background: radial-gradient(circle, rgba(0,200,150,0.12), transparent 70%);
+    border-radius: 50%;
+  }
+
+  .student-avatar {
+    width: 56px; height: 56px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 12px;
+  }
+
+  .student-name {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .student-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .meta-tag {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .meta-tag span { color: var(--text); font-weight: 600; }
+
+  /* Total Score */
+  .total-score-bar {
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .score-info h3 {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .score-big {
+    font-size: 42px;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .score-big .out-of {
+    font-size: 16px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .score-circle-wrap {
+    position: relative;
+    width: 80px; height: 80px;
+    flex-shrink: 0;
+  }
+
+  .score-circle-wrap svg {
+    transform: rotate(-90deg);
+  }
+
+  .score-pct {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    font-size: 15px;
+    font-weight: 900;
+  }
+
+  /* Subjects Grid */
+  .subjects-section {
+    padding: 20px;
+  }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .subjects-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .subject-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .subject-item::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 3px; height: 100%;
+    background: var(--accent);
+    border-radius: 0 12px 12px 0;
+  }
+
+  .subject-item.secondary::before { background: var(--accent2); }
+  .subject-item.extra::before { background: var(--warn); }
+
+  .subject-label {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .subject-score {
+    font-size: 24px;
+    font-weight: 900;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .subject-max {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 600;
+    margin-top: 2px;
+  }
+
+  .subject-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+
+  .subject-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.8s ease;
+  }
+
+  .subject-item.secondary .subject-bar-fill { background: var(--accent2); }
+  .subject-item.extra .subject-bar-fill { background: var(--warn); }
+
+  /* Math combined */
+  .subject-item.full-width {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .math-parts {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .math-parts b { color: var(--text); font-size: 14px; }
+
+  /* ===== ACTION BUTTONS ===== */
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .action-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 8px;
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+  }
+
+  .action-btn .icon { font-size: 22px; }
+
+  .action-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .action-btn:active { transform: scale(0.96); }
+
+  .action-btn.img-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .action-btn.pdf-btn:hover { border-color: #ff4444; color: #ff4444; }
+  .action-btn.wa-btn:hover { border-color: #25d366; color: #25d366; }
+
+  /* ===== BOTTOM NAV ===== */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-around;
+    padding: 8px 0;
+    z-index: 200;
+    backdrop-filter: blur(12px);
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 6px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 600;
+    border: none;
+    background: none;
+    font-family: 'Cairo', sans-serif;
+  }
+
+  .nav-item.active { color: var(--accent); }
+  .nav-item .nav-icon { font-size: 22px; }
+
+  /* ===== DEVELOPER SIGNATURE ===== */
+  .dev-signature {
+    text-align: center;
+    padding: 18px 16px 6px;
+    margin-bottom: 4px;
+  }
+
+  .dev-inner {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 24px;
+  }
+
+  .dev-text {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .dev-name {
+    font-size: 15px;
+    font-weight: 900;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+
+  .dev-name:hover { opacity: 0.8; }
+
+  /* ===== PRINT / SCREENSHOT AREA ===== */
+  #printable {
+    background: #fff;
+    color: #111;
+    font-family: 'Cairo', sans-serif;
+    padding: 28px 24px;
+    border-radius: 16px;
+    direction: rtl;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 380px) {
+    .subjects-grid { grid-template-columns: 1fr; }
+    .subjects-grid .full-width { grid-column: 1; }
+    .score-big { font-size: 32px; }
+    .actions { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP PROGRESS BAR -->
+<div id="topBar"></div>
+
+<!-- HEADER -->
+<div class="header">
+  <h1>🎓 نتيجة الطالب</h1>
+  <p>نظام الاستعلام عن نتائج الامتحانات</p>
+</div>
+
+<!-- MAIN -->
+<div class="container">
+
+  <!-- SEARCH -->
+  <div class="search-card">
+    <label>رقم الجلوس</label>
+    <div class="input-row">
+      <input
+        class="seat-input"
+        id="seatInput"
+        type="number"
+        placeholder="أدخل رقم الجلوس..."
+        inputmode="numeric"
+        autocomplete="off"
+      />
+      <button class="search-btn" id="searchBtn" onclick="fetchResult()">
+        <span>🔍</span> بحث
+      </button>
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  <div class="error-box" id="errorBox"></div>
+
+  <!-- LOADER -->
+  <div class="loader" id="loader">
+    <span class="heart-loader">❤️</span>
+    <div class="loader-text">جاري البحث عن نتيجتك…</div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="result-section">
+
+    <!-- ACTION BUTTONS -->
+    <div class="actions">
+      <button class="action-btn img-btn" onclick="downloadImage()">
+        <span class="icon">🖼️</span>
+        تحميل صورة
+      </button>
+      <button class="action-btn pdf-btn" onclick="downloadPDF()">
+        <span class="icon">📄</span>
+        تحميل PDF
+      </button>
+      <button class="action-btn wa-btn" onclick="shareWhatsApp()">
+        <span class="icon">💬</span>
+        واتساب
+      </button>
+    </div>
+
+    <!-- RESULT CARD -->
+    <div class="result-card" id="resultCard">
+      <!-- Student Header -->
+      <div class="student-header">
+        <div class="student-avatar">👤</div>
+        <div class="student-name" id="r-name">—</div>
+        <div class="student-meta">
+          <div class="meta-tag">رقم جلوس: <span id="r-seat">—</span></div>
+          <div class="meta-tag">الصف: <span id="r-grade">—</span></div>
+          <div class="meta-tag">المدرسة: <span id="r-school">—</span></div>
+          <div class="meta-tag">الإدارة: <span id="r-admin">—</span></div>
+        </div>
+      </div>
+
+      <!-- Total -->
+      <div class="total-score-bar">
+        <div class="score-info">
+          <h3>المجموع الكلي</h3>
+          <div class="score-big" id="r-total-display">
+            — <span class="out-of">/ 280</span>
+          </div>
+        </div>
+        <div class="score-circle-wrap">
+          <svg width="80" height="80" viewBox="0 0 80 80">
+            <circle cx="40" cy="40" r="34" fill="none" stroke="#253545" stroke-width="6"/>
+            <circle cx="40" cy="40" r="34" fill="none" stroke="url(#grad)" stroke-width="6"
+              stroke-linecap="round" stroke-dasharray="213.6" id="progressArc"
+              stroke-dashoffset="213.6"/>
+            <defs>
+              <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#00c896"/>
+                <stop offset="100%" style="stop-color:#0098ff"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="score-pct" id="r-pct" style="color:#00c896">—%</div>
+        </div>
+      </div>
+
+      <!-- Core Subjects -->
+      <div class="subjects-section">
+        <div class="section-title">المواد الأساسية (من 140)</div>
+        <div class="subjects-grid" id="core-grid">
+          <!-- filled by JS -->
+        </div>
+
+        <div class="section-title" style="margin-top:18px">المواد خارج المجموع</div>
+        <div class="subjects-grid" id="extra-grid">
+          <!-- filled by JS -->
+        </div>
+      </div>
+
+      <!-- Signature inside card — appears in image/PDF export -->
+      <div style="text-align:center; padding:14px 20px 18px; border-top:1px solid var(--border);">
+        <div style="font-size:12px; color:var(--muted); font-weight:600; margin-bottom:3px;">برمجة وتطوير بكل حب ❤️</div>
+        <div style="font-size:15px; font-weight:900; background:linear-gradient(90deg,#00c896,#0098ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">المهندس محمد حماد</div>
+        <div style="font-size:11px; color:var(--muted); margin-top:3px;">facebook.com/en.mohamed.nasr</div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- DEVELOPER SIGNATURE -->
+<div class="dev-signature">
+  <div class="dev-inner">
+    <div class="dev-text">برمجة وتطوير بكل حب ❤️</div>
+    <a class="dev-name" href="https://www.facebook.com/en.mohamed.nasr" target="_blank" rel="noopener">
+      المهندس محمد حماد
+    </a>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-item active" onclick="scrollTo(0,0)">
+    <span class="nav-icon">🏠</span> الرئيسية
+  </button>
+  <button class="nav-item" onclick="document.getElementById('seatInput').focus(); scrollTo(0,0)">
+    <span class="nav-icon">🔍</span> بحث
+  </button>
+  <button class="nav-item" onclick="shareWhatsApp()" id="navShare">
+    <span class="nav-icon">📤</span> مشاركة
+  </button>
+</nav>
+
+<!-- html2canvas + jsPDF (CDN) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+// ───── CONFIG ─────────────────────────────────────────────────
+// Change this to your Cloudflare Worker URL after deployment
+const WORKER_URL = 'https://natega.studegy10.workers.dev';
+// If using the Worker proxy, set this to your Worker URL instead:
+// const WORKER_URL = 'https://natega.studegy10.workers.dev';
+
+// ───── PROGRESS BAR ───────────────────────────────────────────
+const bar = document.getElementById('topBar');
+let barTimer = null;
+
+function barStart() {
+  bar.style.transition = 'none';
+  bar.style.width = '0%';
+  bar.style.opacity = '1';
+  // fast fake progress: 0 → 70% in 400ms, then crawl
+  requestAnimationFrame(() => {
+    bar.style.transition = 'width 0.4s ease';
+    bar.style.width = '70%';
+  });
+  barTimer = setTimeout(() => {
+    bar.style.transition = 'width 2s ease';
+    bar.style.width = '88%';
+  }, 420);
+}
+
+function barDone(success = true) {
+  clearTimeout(barTimer);
+  bar.style.transition = 'width 0.15s ease';
+  bar.style.width = '100%';
+  bar.style.background = success
+    ? 'linear-gradient(90deg,#00c896,#0098ff,#ff6bda)'
+    : '#ff4444';
+  setTimeout(() => {
+    bar.style.transition = 'opacity 0.4s ease';
+    bar.style.opacity = '0';
+    setTimeout(() => { bar.style.width = '0%'; }, 420);
+  }, 300);
+}
+
+// ───── STATE ──────────────────────────────────────────────────
+let currentData = null;
+
+// ───── FETCH (fast + timeout 8s) ──────────────────────────────
+async function fetchResult() {
+  const seat = document.getElementById('seatInput').value.trim();
+  if (!seat) return alert('من فضلك أدخل رقم الجلوس');
+
+  // UI reset
+  document.getElementById('errorBox').style.display = 'none';
+  document.getElementById('result-section').style.display = 'none';
+  document.getElementById('loader').style.display = 'block';
+  document.getElementById('searchBtn').disabled = true;
+  barStart();
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000); // 8s max
+
+  try {
+    const res = await fetch(
+      `${WORKER_URL}?seat=${encodeURIComponent(seat)}`,
+      {
+        signal: controller.signal,
+        cache: 'no-store',
+        headers: {
+          'Referer': 'https://natiga.edudk.net/P20262026/public/index.html',
+          'Origin':  'https://natiga.edudk.net'
+        }
+      }
+    );
+    clearTimeout(timeout);
+
+    if (!res.ok) throw new Error(`خطأ في الاتصال (${res.status})`);
+
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.msg || 'حدث خطأ في جلب النتيجة');
+
+    currentData = json.data;
+    barDone(true);
+    renderResult(json.data);
+
+  } catch (e) {
+    clearTimeout(timeout);
+    barDone(false);
+    const msg = e.name === 'AbortError'
+      ? '⏱️ انتهت مهلة الاتصال، حاول مرة أخرى'
+      : '⚠️ ' + e.message;
+    const box = document.getElementById('errorBox');
+    box.textContent = msg;
+    box.style.display = 'block';
+  } finally {
+    document.getElementById('loader').style.display = 'none';
+    document.getElementById('searchBtn').disabled = false;
+  }
+}
+
+// ───── RENDER ─────────────────────────────────────────────────
+function renderResult(d) {
+  // Student info
+  document.getElementById('r-name').textContent   = d.student_name || '—';
+  document.getElementById('r-seat').textContent   = d.seat_no      || '—';
+  document.getElementById('r-grade').textContent  = d.grade_name   || '—';
+  document.getElementById('r-school').textContent = d.school_name  || '—';
+  document.getElementById('r-admin').textContent  = d.admin_name   || '—';
+
+  // Total
+  const total = +d.total || 0;
+  const pct   = Math.round((total / 280) * 100);
+  document.getElementById('r-total-display').innerHTML =
+    `${total} <span class="out-of">/ 280</span>`;
+  document.getElementById('r-pct').textContent = pct + '%';
+
+  // Animate circle
+  const circ = 213.6;
+  const offset = circ - (pct / 100) * circ;
+  setTimeout(() => {
+    document.getElementById('progressArc').style.strokeDashoffset = offset;
+    document.getElementById('progressArc').style.transition = 'stroke-dashoffset 1s ease';
+  }, 100);
+
+  // Core subjects (total from 140)
+  const coreSubjects = [
+    { key: 'ar',       label: 'اللغة العربية',  max: 45  },
+    { key: 'en',       label: 'اللغة الإنجليزية', max: 30 },
+    { key: 'studies',  label: 'الدراسات',       max: 25  },
+    { key: 'math_total', label: 'الرياضيات',     max: 40, ismath: true,
+      sub: [{ key: 'algebra', label: 'جبر', max: 20 }, { key: 'geometry', label: 'هندسة', max: 20 }] },
+    { key: 'science',  label: 'العلوم',          max: 40  },
+  ];
+
+  const extraSubjects = [
+    { key: 'religion', label: 'التربية الدينية', max: 50 },
+    { key: 'art',      label: 'التربية الفنية',  max: 50 },
+    { key: 'computer', label: 'الحاسب الآلي',    max: 50 },
+    { key: 'level1',   label: 'مستوى 1',         max: 50 },
+    { key: 'level2',   label: 'مستوى 2',         max: 50 },
+  ];
+
+  document.getElementById('core-grid').innerHTML  = buildGrid(coreSubjects, d, 'secondary');
+  document.getElementById('extra-grid').innerHTML = buildGrid(extraSubjects, d, 'extra');
+
+  document.getElementById('result-section').style.display = 'block';
+
+  // Scroll to result
+  document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
+}
+
+function buildGrid(subjects, d, type) {
+  return subjects.map(s => {
+    const val = +d[s.key] || 0;
+    const pct = Math.round((val / s.max) * 100);
+
+    if (s.ismath) {
+      const alg = +d['algebra'] || 0;
+      const geo = +d['geometry'] || 0;
+      return `
+        <div class="subject-item ${type} full-width">
+          <div>
+            <div class="subject-label">${s.label}</div>
+            <div class="subject-score">${val}</div>
+            <div class="subject-max">من ${s.max}</div>
+          </div>
+          <div class="math-parts">
+            <div>جبر<br><b>${alg}</b>/20</div>
+            <div>هندسة<br><b>${geo}</b>/20</div>
+          </div>
+        </div>`;
+    }
+
+    return `
+      <div class="subject-item ${type}">
+        <div class="subject-label">${s.label}</div>
+        <div class="subject-score">${val}</div>
+        <div class="subject-max">من ${s.max}</div>
+        <div class="subject-bar">
+          <div class="subject-bar-fill" style="width:${pct}%"></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ───── DOWNLOAD IMAGE ─────────────────────────────────────────
+async function downloadImage() {
+  if (!currentData) return alert('لا توجد نتيجة للتحميل');
+  const el = document.getElementById('resultCard');
+  const canvas = await html2canvas(el, { scale: 2.5, backgroundColor: '#1d2d40', useCORS: true });
+  const a = document.createElement('a');
+  a.download = `نتيجة_${currentData.student_name || 'الطالب'}.png`;
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+}
+
+// ───── DOWNLOAD PDF ───────────────────────────────────────────
+async function downloadPDF() {
+  if (!currentData) return alert('لا توجد نتيجة للتحميل');
+  const { jsPDF } = window.jspdf;
+  const el = document.getElementById('resultCard');
+  const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#1d2d40', useCORS: true });
+  const imgData = canvas.toDataURL('image/png');
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pageW = pdf.internal.pageSize.getWidth();
+  const imgH = (canvas.height / canvas.width) * pageW;
+  pdf.addImage(imgData, 'PNG', 0, 10, pageW, imgH);
+  pdf.save(`نتيجة_${currentData.student_name || 'الطالب'}.pdf`);
+}
+
+// ───── SHARE WHATSAPP ─────────────────────────────────────────
+function shareWhatsApp() {
+  if (!currentData) return alert('لا توجد نتيجة للمشاركة');
+  const d = currentData;
+  const pct = Math.round((+d.total / 280) * 100);
+
+  const text = `
+🎓 *نتيجة الطالب*
+
+👤 *الاسم:* ${d.student_name}
+🪑 *رقم الجلوس:* ${d.seat_no}
+🏫 *المدرسة:* ${d.school_name}
+📚 *الصف:* ${d.grade_name}
+🏛️ *الإدارة:* ${d.admin_name}
+
+━━━━━━━━━━━━━━━
+📊 *المواد الأساسية*
+• اللغة العربية: ${d.ar}/45
+• اللغة الإنجليزية: ${d.en}/30
+• الدراسات الاجتماعية: ${d.studies}/25
+• الرياضيات: ${d.math_total}/40 (جبر ${d.algebra} + هندسة ${d.geometry})
+• العلوم: ${d.science}/40
+
+━━━━━━━━━━━━━━━
+📝 *المواد خارج المجموع*
+• التربية الدينية: ${d.religion}/50
+• التربية الفنية: ${d.art}/50
+• الحاسب الآلي: ${d.computer}/50
+• مستوى 1: ${d.level1}/50
+• مستوى 2: ${d.level2}/50
+
+━━━━━━━━━━━━━━━
+🏆 *المجموع الكلي: ${d.total}/280 (${pct}%)*
+
+🔗 تم الاستعلام عبر نظام النتائج
+
+✨ برمجة وتطوير بكل حب ❤️
+👨‍💻 المهندس محمد حماد
+🔵 https://www.facebook.com/en.mohamed.nasr
+`.trim();
+
+  const encoded = encodeURIComponent(text);
+  window.open(`https://wa.me/?text=${encoded}`, '_blank');
+}
+
+// ───── ENTER KEY ──────────────────────────────────────────────
+document.getElementById('seatInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') fetchResult();
+});
+</script>
+
+</body>
+</html>

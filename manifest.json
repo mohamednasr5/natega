@@ -1,0 +1,18 @@
+{
+  "name": "نتيجة الطالب",
+  "short_name": "النتيجة",
+  "description": "الاستعلام عن نتائج الامتحانات",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#0f1923",
+  "theme_color": "#00c896",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "https://api.iconify.design/twemoji/graduation-cap.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}
