@@ -1,958 +1,1148 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>نتيجة الطالب</title>
-<link rel="manifest" href="manifest.json">
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
-
-  :root {
-    --bg: #0f1923;
-    --surface: #162030;
-    --card: #1d2d40;
-    --accent: #00c896;
-    --accent2: #0098ff;
-    --warn: #ff6b35;
-    --text: #e8f0f8;
-    --muted: #7a96b0;
-    --border: #253545;
-    --success-bg: #0a2a1e;
-    --radius: 16px;
-    --shadow: 0 4px 24px rgba(0,0,0,0.4);
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    font-family: 'Cairo', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    padding-bottom: 80px;
-  }
-
-  /* ===== HEADER ===== */
-  .header {
-    background: linear-gradient(135deg, #0d1f2d 0%, #162030 100%);
-    border-bottom: 1px solid var(--border);
-    padding: 20px 16px 16px;
-    text-align: center;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    backdrop-filter: blur(10px);
-  }
-
-  .header h1 {
-    font-size: 20px;
-    font-weight: 900;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    letter-spacing: -0.5px;
-  }
-
-  .header p {
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 2px;
-  }
-
-  /* ===== MAIN CONTENT ===== */
-  .container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px 16px;
-  }
-
-  /* ===== SEARCH CARD ===== */
-  .search-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px 20px;
-    margin-bottom: 20px;
-    box-shadow: var(--shadow);
-  }
-
-  .search-card label {
-    display: block;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--muted);
-    margin-bottom: 10px;
-  }
-
-  .input-row {
-    display: flex;
-    gap: 10px;
-  }
-
-  .seat-input {
-    flex: 1;
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 16px;
-    font-family: 'Cairo', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text);
-    text-align: center;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    direction: ltr;
-  }
-
-  .seat-input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(0,200,150,0.15);
-  }
-
-  .seat-input::placeholder { color: var(--muted); font-size: 14px; }
-
-  .search-btn {
-    background: linear-gradient(135deg, var(--accent), #00a87a);
-    color: #fff;
-    border: none;
-    border-radius: 12px;
-    padding: 14px 24px;
-    font-family: 'Cairo', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.1s;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .search-btn:hover { opacity: 0.9; }
-  .search-btn:active { transform: scale(0.97); }
-  .search-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  /* ===== TOP PROGRESS BAR ===== */
-  #topBar {
-    position: fixed;
-    top: 0; left: 0;
-    height: 3px;
-    width: 0%;
-    background: linear-gradient(90deg, var(--accent), var(--accent2), #ff6bda);
-    z-index: 9999;
-    transition: width 0.25s ease, opacity 0.4s ease;
-    opacity: 0;
-    box-shadow: 0 0 10px var(--accent);
-  }
-
-  /* ===== LOADER (heart) ===== */
-  .loader {
-    display: none;
-    text-align: center;
-    padding: 36px 20px;
-    color: var(--muted);
-  }
-
-  .heart-loader {
-    font-size: 48px;
-    animation: heartbeat 0.7s ease-in-out infinite;
-    display: block;
-    margin-bottom: 14px;
-    filter: drop-shadow(0 0 12px rgba(255,60,80,0.6));
-  }
-
-  @keyframes heartbeat {
-    0%   { transform: scale(1);    }
-    14%  { transform: scale(1.22); }
-    28%  { transform: scale(1);    }
-    42%  { transform: scale(1.16); }
-    70%  { transform: scale(1);    }
-  }
-
-  .loader-text {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--muted);
-    animation: pulse-text 1.2s ease-in-out infinite;
-  }
-
-  @keyframes pulse-text {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0.4; }
-  }
-
-  /* ===== ERROR ===== */
-  .error-box {
-    display: none;
-    background: #2a1018;
-    border: 1px solid #6b2030;
-    border-radius: var(--radius);
-    padding: 16px 20px;
-    color: #ff8fa3;
-    font-size: 14px;
-    font-weight: 600;
-    text-align: center;
-    margin-bottom: 20px;
-  }
-
-  /* ===== RESULT CARD ===== */
-  #result-section { display: none; }
-
-  .result-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    box-shadow: var(--shadow);
-    margin-bottom: 16px;
-  }
-
-  /* Student Info Header */
-  .student-header {
-    background: linear-gradient(135deg, #0d2a1e 0%, #0d1f35 100%);
-    border-bottom: 1px solid var(--border);
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .student-header::before {
-    content: '';
-    position: absolute;
-    top: -30px; left: -30px;
-    width: 120px; height: 120px;
-    background: radial-gradient(circle, rgba(0,200,150,0.12), transparent 70%);
-    border-radius: 50%;
-  }
-
-  .student-avatar {
-    width: 56px; height: 56px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    margin-bottom: 12px;
-  }
-
-  .student-name {
-    font-size: 20px;
-    font-weight: 900;
-    color: var(--text);
-    margin-bottom: 4px;
-  }
-
-  .student-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 10px;
-  }
-
-  .meta-tag {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 20px;
-    padding: 4px 12px;
-    font-size: 12px;
-    color: var(--muted);
-  }
-
-  .meta-tag span { color: var(--text); font-weight: 600; }
-
-  /* Total Score */
-  .total-score-bar {
-    padding: 20px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-
-  .score-info h3 {
-    font-size: 13px;
-    color: var(--muted);
-    font-weight: 600;
-    margin-bottom: 4px;
-  }
-
-  .score-big {
-    font-size: 42px;
-    font-weight: 900;
-    line-height: 1;
-  }
-
-  .score-big .out-of {
-    font-size: 16px;
-    color: var(--muted);
-    font-weight: 600;
-  }
-
-  .score-circle-wrap {
-    position: relative;
-    width: 80px; height: 80px;
-    flex-shrink: 0;
-  }
-
-  .score-circle-wrap svg {
-    transform: rotate(-90deg);
-  }
-
-  .score-pct {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%,-50%);
-    font-size: 15px;
-    font-weight: 900;
-  }
-
-  /* Subjects Grid */
-  .subjects-section {
-    padding: 20px;
-  }
-
-  .section-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .section-title::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
-  .subjects-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-
-  .subject-item {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .subject-item::before {
-    content: '';
-    position: absolute;
-    top: 0; right: 0;
-    width: 3px; height: 100%;
-    background: var(--accent);
-    border-radius: 0 12px 12px 0;
-  }
-
-  .subject-item.secondary::before { background: var(--accent2); }
-  .subject-item.extra::before { background: var(--warn); }
-
-  .subject-label {
-    font-size: 12px;
-    color: var(--muted);
-    font-weight: 600;
-    margin-bottom: 6px;
-  }
-
-  .subject-score {
-    font-size: 24px;
-    font-weight: 900;
-    color: var(--text);
-    line-height: 1;
-  }
-
-  .subject-max {
-    font-size: 12px;
-    color: var(--muted);
-    font-weight: 600;
-    margin-top: 2px;
-  }
-
-  .subject-bar {
-    height: 3px;
-    background: var(--border);
-    border-radius: 2px;
-    margin-top: 8px;
-    overflow: hidden;
-  }
-
-  .subject-bar-fill {
-    height: 100%;
-    background: var(--accent);
-    border-radius: 2px;
-    transition: width 0.8s ease;
-  }
-
-  .subject-item.secondary .subject-bar-fill { background: var(--accent2); }
-  .subject-item.extra .subject-bar-fill { background: var(--warn); }
-
-  /* Math combined */
-  .subject-item.full-width {
-    grid-column: 1 / -1;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .math-parts {
-    display: flex;
-    gap: 16px;
-    font-size: 12px;
-    color: var(--muted);
-  }
-
-  .math-parts b { color: var(--text); font-size: 14px; }
-
-  /* ===== ACTION BUTTONS ===== */
-  .actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-
-  .action-btn {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 8px;
-    color: var(--text);
-    font-family: 'Cairo', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    text-align: center;
-  }
-
-  .action-btn .icon { font-size: 22px; }
-
-  .action-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .action-btn:active { transform: scale(0.96); }
-
-  .action-btn.img-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .action-btn.pdf-btn:hover { border-color: #ff4444; color: #ff4444; }
-  .action-btn.wa-btn:hover { border-color: #25d366; color: #25d366; }
-
-  /* ===== BOTTOM NAV ===== */
-  .bottom-nav {
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-    display: flex;
-    justify-content: space-around;
-    padding: 8px 0;
-    z-index: 200;
-    backdrop-filter: blur(12px);
-  }
-
-  .nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-    padding: 6px 16px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.2s;
-    color: var(--muted);
-    font-size: 10px;
-    font-weight: 600;
-    border: none;
-    background: none;
-    font-family: 'Cairo', sans-serif;
-  }
-
-  .nav-item.active { color: var(--accent); }
-  .nav-item .nav-icon { font-size: 22px; }
-
-  /* ===== DEVELOPER SIGNATURE ===== */
-  .dev-signature {
-    text-align: center;
-    padding: 18px 16px 6px;
-    margin-bottom: 4px;
-  }
-
-  .dev-inner {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 12px 24px;
-  }
-
-  .dev-text {
-    font-size: 13px;
-    color: var(--muted);
-    font-weight: 600;
-  }
-
-  .dev-name {
-    font-size: 15px;
-    font-weight: 900;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-decoration: none;
-    transition: opacity 0.2s;
-  }
-
-  .dev-name:hover { opacity: 0.8; }
-
-  /* ===== PRINT / SCREENSHOT AREA ===== */
-  #printable {
-    background: #fff;
-    color: #111;
-    font-family: 'Cairo', sans-serif;
-    padding: 28px 24px;
-    border-radius: 16px;
-    direction: rtl;
-  }
-
-  /* ===== RESPONSIVE ===== */
-  @media (max-width: 380px) {
-    .subjects-grid { grid-template-columns: 1fr; }
-    .subjects-grid .full-width { grid-column: 1; }
-    .score-big { font-size: 32px; }
-    .actions { grid-template-columns: 1fr; }
-  }
-</style>
-</head>
-<body>
-
-<!-- TOP PROGRESS BAR -->
-<div id="topBar"></div>
-
-<!-- HEADER -->
-<div class="header">
-  <h1>🎓 نتيجة الطالب</h1>
-  <p>نظام الاستعلام عن نتائج الامتحانات</p>
-</div>
-
-<!-- MAIN -->
-<div class="container">
-
-  <!-- SEARCH -->
-  <div class="search-card">
-    <label>رقم الجلوس</label>
-    <div class="input-row">
-      <input
-        class="seat-input"
-        id="seatInput"
-        type="number"
-        placeholder="أدخل رقم الجلوس..."
-        inputmode="numeric"
-        autocomplete="off"
-      />
-      <button class="search-btn" id="searchBtn" onclick="fetchResult()">
-        <span>🔍</span> بحث
-      </button>
-    </div>
-  </div>
-
-  <!-- ERROR -->
-  <div class="error-box" id="errorBox"></div>
-
-  <!-- LOADER -->
-  <div class="loader" id="loader">
-    <span class="heart-loader">❤️</span>
-    <div class="loader-text">جاري البحث عن نتيجتك…</div>
-  </div>
-
-  <!-- RESULT -->
-  <div id="result-section">
-
-    <!-- ACTION BUTTONS -->
-    <div class="actions">
-      <button class="action-btn img-btn" onclick="downloadImage()">
-        <span class="icon">🖼️</span>
-        تحميل صورة
-      </button>
-      <button class="action-btn pdf-btn" onclick="downloadPDF()">
-        <span class="icon">📄</span>
-        تحميل PDF
-      </button>
-      <button class="action-btn wa-btn" onclick="shareWhatsApp()">
-        <span class="icon">💬</span>
-        واتساب
-      </button>
-    </div>
-
-    <!-- RESULT CARD -->
-    <div class="result-card" id="resultCard">
-      <!-- Student Header -->
-      <div class="student-header">
-        <div class="student-avatar">👤</div>
-        <div class="student-name" id="r-name">—</div>
-        <div class="student-meta">
-          <div class="meta-tag">رقم جلوس: <span id="r-seat">—</span></div>
-          <div class="meta-tag">الصف: <span id="r-grade">—</span></div>
-          <div class="meta-tag">المدرسة: <span id="r-school">—</span></div>
-          <div class="meta-tag">الإدارة: <span id="r-admin">—</span></div>
-        </div>
-      </div>
-
-      <!-- Total -->
-      <div class="total-score-bar">
-        <div class="score-info">
-          <h3>المجموع الكلي</h3>
-          <div class="score-big" id="r-total-display">
-            — <span class="out-of">/ 280</span>
-          </div>
-        </div>
-        <div class="score-circle-wrap">
-          <svg width="80" height="80" viewBox="0 0 80 80">
-            <circle cx="40" cy="40" r="34" fill="none" stroke="#253545" stroke-width="6"/>
-            <circle cx="40" cy="40" r="34" fill="none" stroke="url(#grad)" stroke-width="6"
-              stroke-linecap="round" stroke-dasharray="213.6" id="progressArc"
-              stroke-dashoffset="213.6"/>
-            <defs>
-              <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" style="stop-color:#00c896"/>
-                <stop offset="100%" style="stop-color:#0098ff"/>
-              </linearGradient>
-            </defs>
-          </svg>
-          <div class="score-pct" id="r-pct" style="color:#00c896">—%</div>
-        </div>
-      </div>
-
-      <!-- Core Subjects -->
-      <div class="subjects-section">
-        <div class="section-title">المواد الأساسية (من 140)</div>
-        <div class="subjects-grid" id="core-grid">
-          <!-- filled by JS -->
-        </div>
-
-        <div class="section-title" style="margin-top:18px">المواد خارج المجموع</div>
-        <div class="subjects-grid" id="extra-grid">
-          <!-- filled by JS -->
-        </div>
-      </div>
-
-      <!-- Signature inside card — appears in image/PDF export -->
-      <div style="text-align:center; padding:14px 20px 18px; border-top:1px solid var(--border);">
-        <div style="font-size:12px; color:var(--muted); font-weight:600; margin-bottom:3px;">برمجة وتطوير بكل حب ❤️</div>
-        <div style="font-size:15px; font-weight:900; background:linear-gradient(90deg,#00c896,#0098ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">المهندس محمد حماد</div>
-        <div style="font-size:11px; color:var(--muted); margin-top:3px;">facebook.com/en.mohamed.nasr</div>
-      </div>
-
-    </div>
-
-  </div>
-
-</div>
-
-<!-- DEVELOPER SIGNATURE -->
-<div class="dev-signature">
-  <div class="dev-inner">
-    <div class="dev-text">برمجة وتطوير بكل حب ❤️</div>
-    <a class="dev-name" href="https://www.facebook.com/en.mohamed.nasr" target="_blank" rel="noopener">
-      المهندس محمد حماد
-    </a>
-  </div>
-</div>
-
-<!-- BOTTOM NAV -->
-<nav class="bottom-nav">
-  <button class="nav-item active" onclick="scrollTo(0,0)">
-    <span class="nav-icon">🏠</span> الرئيسية
-  </button>
-  <button class="nav-item" onclick="document.getElementById('seatInput').focus(); scrollTo(0,0)">
-    <span class="nav-icon">🔍</span> بحث
-  </button>
-  <button class="nav-item" onclick="shareWhatsApp()" id="navShare">
-    <span class="nav-icon">📤</span> مشاركة
-  </button>
-</nav>
-
-<!-- html2canvas + jsPDF (CDN) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-<script>
-// ───── CONFIG ─────────────────────────────────────────────────
-// Change this to your Cloudflare Worker URL after deployment
-const WORKER_URL = 'https://natega.studegy10.workers.dev';
-// If using the Worker proxy, set this to your Worker URL instead:
-// const WORKER_URL = 'https://natega.studegy10.workers.dev';
-
-// ───── PROGRESS BAR ───────────────────────────────────────────
-const bar = document.getElementById('topBar');
-let barTimer = null;
-
-function barStart() {
-  bar.style.transition = 'none';
-  bar.style.width = '0%';
-  bar.style.opacity = '1';
-  // fast fake progress: 0 → 70% in 400ms, then crawl
-  requestAnimationFrame(() => {
-    bar.style.transition = 'width 0.4s ease';
-    bar.style.width = '70%';
-  });
-  barTimer = setTimeout(() => {
-    bar.style.transition = 'width 2s ease';
-    bar.style.width = '88%';
-  }, 420);
-}
-
-function barDone(success = true) {
-  clearTimeout(barTimer);
-  bar.style.transition = 'width 0.15s ease';
-  bar.style.width = '100%';
-  bar.style.background = success
-    ? 'linear-gradient(90deg,#00c896,#0098ff,#ff6bda)'
-    : '#ff4444';
-  setTimeout(() => {
-    bar.style.transition = 'opacity 0.4s ease';
-    bar.style.opacity = '0';
-    setTimeout(() => { bar.style.width = '0%'; }, 420);
-  }, 300);
-}
-
-// ───── STATE ──────────────────────────────────────────────────
-let currentData = null;
-
-// ───── FETCH (fast + timeout 8s) ──────────────────────────────
-async function fetchResult() {
-  const seat = document.getElementById('seatInput').value.trim();
-  if (!seat) return alert('من فضلك أدخل رقم الجلوس');
-
-  // UI reset
-  document.getElementById('errorBox').style.display = 'none';
-  document.getElementById('result-section').style.display = 'none';
-  document.getElementById('loader').style.display = 'block';
-  document.getElementById('searchBtn').disabled = true;
-  barStart();
-
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 8000); // 8s max
-
-  try {
-    const res = await fetch(
-      `${WORKER_URL}?seat=${encodeURIComponent(seat)}`,
-      {
-        signal: controller.signal,
-        cache: 'no-store',
-        headers: {
-          'Referer': 'https://natiga.edudk.net/P20262026/public/index.html',
-          'Origin':  'https://natiga.edudk.net'
-        }
-      }
-    );
-    clearTimeout(timeout);
-
-    if (!res.ok) throw new Error(`خطأ في الاتصال (${res.status})`);
-
-    const json = await res.json();
-    if (!json.ok) throw new Error(json.msg || 'حدث خطأ في جلب النتيجة');
-
-    currentData = json.data;
-    barDone(true);
-    renderResult(json.data);
-
-  } catch (e) {
-    clearTimeout(timeout);
-    barDone(false);
-    const msg = e.name === 'AbortError'
-      ? '⏱️ انتهت مهلة الاتصال، حاول مرة أخرى'
-      : '⚠️ ' + e.message;
-    const box = document.getElementById('errorBox');
-    box.textContent = msg;
-    box.style.display = 'block';
-  } finally {
-    document.getElementById('loader').style.display = 'none';
-    document.getElementById('searchBtn').disabled = false;
-  }
-}
-
-// ───── RENDER ─────────────────────────────────────────────────
-function renderResult(d) {
-  // Student info
-  document.getElementById('r-name').textContent   = d.student_name || '—';
-  document.getElementById('r-seat').textContent   = d.seat_no      || '—';
-  document.getElementById('r-grade').textContent  = d.grade_name   || '—';
-  document.getElementById('r-school').textContent = d.school_name  || '—';
-  document.getElementById('r-admin').textContent  = d.admin_name   || '—';
-
-  // Total
-  const total = +d.total || 0;
-  const pct   = Math.round((total / 280) * 100);
-  document.getElementById('r-total-display').innerHTML =
-    `${total} <span class="out-of">/ 280</span>`;
-  document.getElementById('r-pct').textContent = pct + '%';
-
-  // Animate circle
-  const circ = 213.6;
-  const offset = circ - (pct / 100) * circ;
-  setTimeout(() => {
-    document.getElementById('progressArc').style.strokeDashoffset = offset;
-    document.getElementById('progressArc').style.transition = 'stroke-dashoffset 1s ease';
-  }, 100);
-
-  // Core subjects (total from 140)
-  const coreSubjects = [
-    { key: 'ar',       label: 'اللغة العربية',  max: 45  },
-    { key: 'en',       label: 'اللغة الإنجليزية', max: 30 },
-    { key: 'studies',  label: 'الدراسات',       max: 25  },
-    { key: 'math_total', label: 'الرياضيات',     max: 40, ismath: true,
-      sub: [{ key: 'algebra', label: 'جبر', max: 20 }, { key: 'geometry', label: 'هندسة', max: 20 }] },
-    { key: 'science',  label: 'العلوم',          max: 40  },
-  ];
-
-  const extraSubjects = [
-    { key: 'religion', label: 'التربية الدينية', max: 50 },
-    { key: 'art',      label: 'التربية الفنية',  max: 50 },
-    { key: 'computer', label: 'الحاسب الآلي',    max: 50 },
-    { key: 'level1',   label: 'مستوى 1',         max: 50 },
-    { key: 'level2',   label: 'مستوى 2',         max: 50 },
-  ];
-
-  document.getElementById('core-grid').innerHTML  = buildGrid(coreSubjects, d, 'secondary');
-  document.getElementById('extra-grid').innerHTML = buildGrid(extraSubjects, d, 'extra');
-
-  document.getElementById('result-section').style.display = 'block';
-
-  // Scroll to result
-  document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
-}
-
-function buildGrid(subjects, d, type) {
-  return subjects.map(s => {
-    const val = +d[s.key] || 0;
-    const pct = Math.round((val / s.max) * 100);
-
-    if (s.ismath) {
-      const alg = +d['algebra'] || 0;
-      const geo = +d['geometry'] || 0;
-      return `
-        <div class="subject-item ${type} full-width">
-          <div>
-            <div class="subject-label">${s.label}</div>
-            <div class="subject-score">${val}</div>
-            <div class="subject-max">من ${s.max}</div>
-          </div>
-          <div class="math-parts">
-            <div>جبر<br><b>${alg}</b>/20</div>
-            <div>هندسة<br><b>${geo}</b>/20</div>
-          </div>
-        </div>`;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎓 نتيجة الطالب</title>
+  <meta name="description" content="نظام الاستعلام عن نتائج الامتحانات" />
+
+  <meta property="og:title" content="نتيجة الطالب - نظام الاستعلام عن النتائج" />
+  <meta property="og:description" content="استعلم عن نتيجة الطالب بسهولة ومشاركة النتيجة مع الأهل والأصدقاء." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://mohamednasr5.github.io/natega/" />
+  <meta property="og:image" content="https://mohamednasr5.github.io/natega/preview.jpg" />
+  <meta property="og:locale" content="ar_AR" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="نتيجة الطالب - نظام الاستعلام عن النتائج" />
+  <meta name="twitter:description" content="استعلام سريع عن النتائج الدراسية ومشاركة النتيجة." />
+  <meta name="twitter:image" content="https://mohamednasr5.github.io/natega/preview.jpg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg1:#0f172a;
+      --bg2:#1e293b;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --line:#e2e8f0;
+      --soft:#f8fafc;
+      --shadow:0 15px 40px rgba(15,23,42,.12);
+      --radius:22px;
+
+      --green:#16a34a;
+      --green2:#15803d;
+      --greenSoft:#ecfdf5;
+      --greenBorder:#bbf7d0;
+
+      --blue:#2563eb;
+      --blue2:#1d4ed8;
+      --blueSoft:#eff6ff;
+      --blueBorder:#bfdbfe;
+
+      --orange:#f59e0b;
+      --orange2:#ea580c;
+      --orangeSoft:#fff7ed;
+      --orangeBorder:#fed7aa;
+
+      --purple:#8b5cf6;
+      --purple2:#7c3aed;
+      --purpleSoft:#f5f3ff;
+      --purpleBorder:#ddd6fe;
+
+      --red:#dc2626;
+      --redSoft:#fef2f2;
+      --redBorder:#fecaca;
     }
 
-    return `
-      <div class="subject-item ${type}">
-        <div class="subject-label">${s.label}</div>
-        <div class="subject-score">${val}</div>
-        <div class="subject-max">من ${s.max}</div>
-        <div class="subject-bar">
-          <div class="subject-bar-fill" style="width:${pct}%"></div>
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
+
+    body{
+      font-family:"Cairo",sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(37,99,235,.18), transparent 22%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      color:#fff;
+      min-height:100vh;
+      padding:24px 14px 80px;
+    }
+
+    a{
+      color:inherit;
+      text-decoration:none;
+    }
+
+    .container{
+      width:min(100%, 1080px);
+      margin:auto;
+    }
+
+    .hero{
+      text-align:center;
+      margin-bottom:24px;
+    }
+
+    .hero h1{
+      font-size:clamp(1.8rem, 4vw, 2.8rem);
+      margin-bottom:8px;
+      font-weight:800;
+    }
+
+    .hero p{
+      color:#dbeafe;
+      font-size:1rem;
+    }
+
+    .search-card{
+      background:rgba(255,255,255,.1);
+      backdrop-filter:blur(10px);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:24px;
+      padding:18px;
+      box-shadow:var(--shadow);
+      margin-bottom:24px;
+    }
+
+    .search-grid{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:12px;
+      align-items:center;
+    }
+
+    .seat-input{
+      width:100%;
+      border:none;
+      outline:none;
+      background:#fff;
+      color:#111827;
+      border-radius:16px;
+      padding:16px 18px;
+      font-size:1.05rem;
+      font-family:inherit;
+      box-shadow:0 8px 20px rgba(0,0,0,.12);
+    }
+
+    .btn{
+      border:none;
+      outline:none;
+      cursor:pointer;
+      font-family:inherit;
+      border-radius:16px;
+      padding:14px 18px;
+      font-size:1rem;
+      font-weight:700;
+      transition:.2s ease;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      min-height:52px;
+    }
+
+    .btn:hover{
+      transform:translateY(-1px);
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg, var(--blue), var(--blue2));
+      color:#fff;
+      box-shadow:0 10px 24px rgba(37,99,235,.28);
+    }
+
+    .btn-soft{
+      background:#fff;
+      color:var(--text);
+    }
+
+    .btn-green{
+      background:#16a34a;
+      color:#fff;
+    }
+
+    .btn-orange{
+      background:#ea580c;
+      color:#fff;
+    }
+
+    .btn-dark{
+      background:#111827;
+      color:#fff;
+    }
+
+    .status{
+      margin-top:12px;
+      font-size:.98rem;
+      color:#e2e8f0;
+      min-height:28px;
+      text-align:center;
+    }
+
+    .result-wrap{
+      display:none;
+    }
+
+    .result-card{
+      background:var(--card);
+      color:var(--text);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      overflow:visible;
+      border:1px solid rgba(226,232,240,.9);
+    }
+
+    .result-head{
+      background:linear-gradient(135deg, #eff6ff, #dbeafe);
+      padding:24px;
+      border-bottom:1px solid var(--line);
+    }
+
+    .result-title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .result-title h2{
+      font-size:1.5rem;
+      color:#0f172a;
+    }
+
+    .badge{
+      background:#fff;
+      color:#16a34a;
+      border:1px solid #bbf7d0;
+      border-radius:999px;
+      padding:8px 14px;
+      font-size:.92rem;
+      font-weight:700;
+    }
+
+    .student-name{
+      margin-top:12px;
+      font-size:1.35rem;
+      color:#111827;
+      font-weight:800;
+    }
+
+    .result-body{
+      padding:24px;
+    }
+
+    .info-grid{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0, 1fr));
+      gap:14px;
+      margin-bottom:20px;
+    }
+
+    .info-box{
+      background:var(--soft);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:16px;
+    }
+
+    .info-box .label{
+      display:block;
+      color:var(--muted);
+      font-size:.9rem;
+      margin-bottom:6px;
+    }
+
+    .info-box .value{
+      display:block;
+      color:#0f172a;
+      font-size:1.05rem;
+      font-weight:700;
+      word-break:break-word;
+    }
+
+    .totals-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(185px, 1fr));
+      gap:16px;
+      margin-bottom:20px;
+    }
+
+    .stat{
+      border-radius:22px;
+      padding:22px 18px;
+      min-height:190px;
+      text-align:center;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      border:1px solid transparent;
+    }
+
+    .stat-icon{
+      width:76px;
+      height:76px;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:2.1rem;
+      font-weight:800;
+      margin-bottom:14px;
+    }
+
+    .stat h3{
+      font-size:1rem;
+      margin-bottom:8px;
+      color:inherit;
+      opacity:.95;
+    }
+
+    .stat .big{
+      font-size:2rem;
+      font-weight:800;
+      line-height:1.2;
+      color:inherit;
+    }
+
+    .stat .small{
+      display:block;
+      margin-top:8px;
+      font-size:.95rem;
+      color:inherit;
+      opacity:.9;
+    }
+
+    .stat-total{
+      background:var(--greenSoft);
+      color:var(--green);
+      border-color:var(--greenBorder);
+    }
+
+    .stat-total .stat-icon{
+      background:#dcfce7;
+      color:var(--green);
+    }
+
+    .stat-grade{
+      background:var(--purpleSoft);
+      color:var(--purple2);
+      border-color:var(--purpleBorder);
+    }
+
+    .stat-grade .stat-icon{
+      background:#ede9fe;
+      color:var(--purple2);
+    }
+
+    .stat-percent{
+      background:#ecfeff;
+      color:#0891b2;
+      border-color:#bae6fd;
+    }
+
+    .stat-percent .stat-icon{
+      background:#cffafe;
+      color:#0891b2;
+    }
+
+    .stat-core{
+      background:var(--orangeSoft);
+      color:var(--orange2);
+      border-color:var(--orangeBorder);
+    }
+
+    .stat-core .stat-icon{
+      background:#ffedd5;
+      color:var(--orange2);
+    }
+
+    .stat-pass{
+      background:var(--greenSoft);
+      color:var(--green);
+      border-color:var(--greenBorder);
+    }
+
+    .stat-pass .stat-icon{
+      background:#dcfce7;
+      color:var(--green);
+    }
+
+    .stat-fail{
+      background:var(--redSoft);
+      color:var(--red);
+      border-color:var(--redBorder);
+    }
+
+    .stat-fail .stat-icon{
+      background:#fee2e2;
+      color:var(--red);
+    }
+
+    .section-title{
+      font-size:1.1rem;
+      color:#111827;
+      margin:18px 0 12px;
+      font-weight:800;
+    }
+
+    .term-results{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0, 1fr));
+      gap:14px;
+      margin-bottom:20px;
+    }
+
+    .term-box{
+      background:#fff7ed;
+      border:1px solid #fed7aa;
+      border-radius:18px;
+      padding:16px;
+    }
+
+    .term-box h3{
+      color:#9a3412;
+      font-size:1rem;
+      margin-bottom:8px;
+    }
+
+    .term-box p{
+      color:#7c2d12;
+      font-size:1.1rem;
+      font-weight:800;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      overflow:hidden;
+      border-radius:18px;
+      border:1px solid var(--line);
+      background:#fff;
+    }
+
+    th, td{
+      padding:14px 12px;
+      text-align:right;
+      border-bottom:1px solid var(--line);
+      font-size:.97rem;
+    }
+
+    th{
+      background:#f8fafc;
+      color:#334155;
+      font-weight:800;
+    }
+
+    tr:last-child td{
+      border-bottom:none;
+    }
+
+    .action-bar{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0, 1fr));
+      gap:12px;
+      margin-top:20px;
+    }
+
+    .footer-note{
+      margin-top:22px;
+      text-align:center;
+      background:#f8fafc;
+      color:#334155;
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:16px;
+      line-height:1.9;
+    }
+
+    .footer-note strong{
+      color:#0f172a;
+    }
+
+    .footer-nav{
+      margin-top:18px;
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap:12px;
+    }
+
+    .footer-nav a{
+      background:#fff;
+      color:#0f172a;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:10px 14px;
+      font-weight:700;
+    }
+
+    .empty-state{
+      text-align:center;
+      color:#fff;
+      opacity:.95;
+      margin-top:10px;
+    }
+
+    .no-print{
+      display:inline-flex;
+    }
+
+    @media (max-width: 768px){
+      .search-grid,
+      .info-grid,
+      .term-results,
+      .action-bar{
+        grid-template-columns:1fr;
+      }
+
+      .totals-grid{
+        grid-template-columns:repeat(2, minmax(0, 1fr));
+      }
+
+      .result-head,
+      .result-body{
+        padding:18px;
+      }
+
+      .student-name{
+        font-size:1.15rem;
+      }
+
+      .stat{
+        min-height:170px;
+        padding:18px 14px;
+      }
+
+      .stat .big{
+        font-size:1.65rem;
+      }
+
+      .stat-icon{
+        width:64px;
+        height:64px;
+        font-size:1.8rem;
+      }
+
+      th, td{
+        font-size:.92rem;
+        padding:12px 10px;
+      }
+    }
+
+    @media (max-width: 480px){
+      .totals-grid{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @page{
+      size:A4 portrait;
+      margin:10mm;
+    }
+
+    @media print{
+      body{
+        background:#fff !important;
+        padding:0 !important;
+      }
+
+      body *{
+        visibility:hidden !important;
+      }
+
+      #printArea, #printArea *{
+        visibility:visible !important;
+      }
+
+      #printArea{
+        position:absolute !important;
+        inset:0 auto auto 0 !important;
+        width:190mm !important;
+        margin:0 !important;
+        padding:0 !important;
+      }
+
+      .result-card{
+        width:190mm !important;
+        margin:0 !important;
+        box-shadow:none !important;
+        border:1px solid #ddd !important;
+        border-radius:0 !important;
+        overflow:visible !important;
+      }
+
+      .no-print{
+        display:none !important;
+      }
+
+      .result-wrap{
+        display:block !important;
+      }
+
+      .footer-note,
+      table,
+      .term-box,
+      .info-box,
+      .stat{
+        break-inside:avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="hero no-print">
+      <h1>🎓 نتيجة الطالب</h1>
+      <p>نظام الاستعلام عن نتائج الامتحانات</p>
+    </header>
+
+    <section class="search-card no-print">
+      <div class="search-grid">
+        <input
+          type="text"
+          id="seatNumber"
+          class="seat-input"
+          placeholder="أدخل رقم الجلوس"
+          inputmode="numeric"
+        />
+        <button class="btn btn-primary" id="searchBtn">🔎 بحث</button>
+      </div>
+      <div class="status" id="statusText">أدخل رقم الجلوس ثم اضغط بحث</div>
+    </section>
+
+    <div class="empty-state no-print" id="emptyState">
+      لا توجد نتيجة معروضة الآن.
+    </div>
+
+    <section class="result-wrap" id="resultSection">
+      <div class="result-card" id="printArea">
+        <div class="result-head">
+          <div class="result-title">
+            <h2>بيان نتيجة الطالب</h2>
+            <span class="badge" id="finalStatus">—</span>
+          </div>
+          <div class="student-name" id="studentName">اسم الطالب</div>
         </div>
-      </div>`;
-  }).join('');
-}
 
-// ───── DOWNLOAD IMAGE ─────────────────────────────────────────
-async function downloadImage() {
-  if (!currentData) return alert('لا توجد نتيجة للتحميل');
-  const el = document.getElementById('resultCard');
-  const canvas = await html2canvas(el, { scale: 2.5, backgroundColor: '#1d2d40', useCORS: true });
-  const a = document.createElement('a');
-  a.download = `نتيجة_${currentData.student_name || 'الطالب'}.png`;
-  a.href = canvas.toDataURL('image/png');
-  a.click();
-}
+        <div class="result-body">
+          <div class="info-grid">
+            <div class="info-box">
+              <span class="label">رقم الجلوس</span>
+              <span class="value" id="seatValue">—</span>
+            </div>
+            <div class="info-box">
+              <span class="label">الصف</span>
+              <span class="value" id="gradeClassValue">—</span>
+            </div>
+            <div class="info-box">
+              <span class="label">المدرسة</span>
+              <span class="value" id="schoolValue">—</span>
+            </div>
+            <div class="info-box">
+              <span class="label">الإدارة</span>
+              <span class="value" id="departmentValue">—</span>
+            </div>
+          </div>
 
-// ───── DOWNLOAD PDF ───────────────────────────────────────────
-async function downloadPDF() {
-  if (!currentData) return alert('لا توجد نتيجة للتحميل');
-  const { jsPDF } = window.jspdf;
-  const el = document.getElementById('resultCard');
-  const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#1d2d40', useCORS: true });
-  const imgData = canvas.toDataURL('image/png');
-  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-  const pageW = pdf.internal.pageSize.getWidth();
-  const imgH = (canvas.height / canvas.width) * pageW;
-  pdf.addImage(imgData, 'PNG', 0, 10, pageW, imgH);
-  pdf.save(`نتيجة_${currentData.student_name || 'الطالب'}.pdf`);
-}
+          <div class="totals-grid">
+            <div class="stat stat-total">
+              <div class="stat-icon">🧮</div>
+              <h3>المجموع الكلي</h3>
+              <div class="big"><span id="totalScore">0</span> / <span id="maxScore">280</span></div>
+              <span class="small">الإجمالي النهائي</span>
+            </div>
 
-// ───── SHARE WHATSAPP ─────────────────────────────────────────
-function shareWhatsApp() {
-  if (!currentData) return alert('لا توجد نتيجة للمشاركة');
-  const d = currentData;
-  const pct = Math.round((+d.total / 280) * 100);
+            <div class="stat stat-grade">
+              <div class="stat-icon" id="gradeIcon">🏅</div>
+              <h3>التقدير العام</h3>
+              <div class="big" id="gradeValueBox">—</div>
+              <span class="small">التقدير النهائي</span>
+            </div>
 
-  const text = `
-🎓 *نتيجة الطالب*
+            <div class="stat stat-percent">
+              <div class="stat-icon">%</div>
+              <h3>النسبة المئوية</h3>
+              <div class="big"><span id="percentageValue">0</span>%</div>
+              <span class="small">نسبة النجاح</span>
+            </div>
 
-👤 *الاسم:* ${d.student_name}
-🪑 *رقم الجلوس:* ${d.seat_no}
-🏫 *المدرسة:* ${d.school_name}
-📚 *الصف:* ${d.grade_name}
-🏛️ *الإدارة:* ${d.admin_name}
+            <div class="stat stat-pass" id="passFailCard">
+              <div class="stat-icon" id="passFailIcon">✔</div>
+              <h3>حالة النتيجة</h3>
+              <div class="big" id="passFailBox">—</div>
+              <span class="small">ناجح أو راسب</span>
+            </div>
 
-━━━━━━━━━━━━━━━
-📊 *المواد الأساسية*
-• اللغة العربية: ${d.ar}/45
-• اللغة الإنجليزية: ${d.en}/30
-• الدراسات الاجتماعية: ${d.studies}/25
-• الرياضيات: ${d.math_total}/40 (جبر ${d.algebra} + هندسة ${d.geometry})
-• العلوم: ${d.science}/40
+            <div class="stat stat-core">
+              <div class="stat-icon">📚</div>
+              <h3>المواد الأساسية</h3>
+              <div class="big"><span id="coreTotal">0</span> / <span id="coreMax">140</span></div>
+              <span class="small">إجمالي المواد الأساسية</span>
+            </div>
+          </div>
 
-━━━━━━━━━━━━━━━
-📝 *المواد خارج المجموع*
-• التربية الدينية: ${d.religion}/50
-• التربية الفنية: ${d.art}/50
-• الحاسب الآلي: ${d.computer}/50
-• مستوى 1: ${d.level1}/50
-• مستوى 2: ${d.level2}/50
+          <h3 class="section-title">نتيجة الفصلين</h3>
+          <div class="term-results">
+            <div class="term-box">
+              <h3>الفصل الدراسي الأول</h3>
+              <p id="term1Result">—</p>
+            </div>
+            <div class="term-box">
+              <h3>الفصل الدراسي الثاني</h3>
+              <p id="term2Result">—</p>
+            </div>
+          </div>
 
-━━━━━━━━━━━━━━━
-🏆 *المجموع الكلي: ${d.total}/280 (${pct}%)*
+          <h3 class="section-title">المواد الأساسية</h3>
+          <table id="subjectsTable">
+            <thead>
+              <tr>
+                <th>المادة</th>
+                <th>الدرجة</th>
+                <th>النهاية الكبرى</th>
+                <th>التقدير</th>
+              </tr>
+            </thead>
+            <tbody id="subjectsBody">
+              <tr>
+                <td colspan="4">لا توجد بيانات</td>
+              </tr>
+            </tbody>
+          </table>
 
-🔗 تم الاستعلام عبر نظام النتائج
+          <h3 class="section-title">المواد خارج المجموع</h3>
+          <table id="extraTable">
+            <thead>
+              <tr>
+                <th>المادة</th>
+                <th>الدرجة</th>
+                <th>الحالة</th>
+              </tr>
+            </thead>
+            <tbody id="extraBody">
+              <tr>
+                <td colspan="3">لا توجد بيانات</td>
+              </tr>
+            </tbody>
+          </table>
 
-✨ برمجة وتطوير بكل حب ❤️
-👨‍💻 المهندس محمد حماد
-🔵 https://www.facebook.com/en.mohamed.nasr
-`.trim();
+          <div class="footer-note">
+            برمجة وتطوير بكل حب ❤️<br>
+            <strong>المهندس محمد حماد</strong><br>
+            <a href="https://mohamednasr5.github.io/natega/" target="_blank">mohamednasr5.github.io/natega</a>
+          </div>
+        </div>
+      </div>
 
-  const encoded = encodeURIComponent(text);
-  window.open(`https://wa.me/?text=${encoded}`, '_blank');
-}
+      <div class="action-bar no-print">
+        <button class="btn btn-soft" id="downloadImageBtn">🖼️ تحميل صورة</button>
+        <button class="btn btn-dark" id="downloadPdfBtn">📄 تحميل PDF</button>
+        <button class="btn btn-orange" id="printBtn">🖨️ طباعة A4</button>
+        <button class="btn btn-green" id="whatsappBtn">💬 واتساب</button>
+      </div>
 
-// ───── ENTER KEY ──────────────────────────────────────────────
-document.getElementById('seatInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') fetchResult();
-});
-</script>
+      <div class="footer-nav no-print">
+        <a href="https://mohamednasr5.github.io/natega/">الرئيسية</a>
+        <a href="#" id="scrollToSearch">بحث</a>
+        <a href="#" id="nativeShareBtn">مشاركة</a>
+      </div>
+    </section>
+  </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+  <script>
+    const SITE_URL = "https://mohamednasr5.github.io/natega/";
+    const DEVELOPER_NAME = "المهندس محمد حماد";
+
+    const demoStudents = [
+      {
+        seatNumber: "1001",
+        name: "أحمد محمد علي",
+        grade: "الصف الثالث الإعدادي",
+        school: "مدرسة النور الإعدادية",
+        department: "إدارة شرق التعليمية",
+        total: 263,
+        maxTotal: 280,
+        percentage: 93.9,
+        coreTotal: 131.5,
+        coreMax: 140,
+        finalStatus: "ناجح",
+        term1Result: "128 درجة - ناجح",
+        term2Result: "135 درجة - ناجح",
+        subjects: [
+          { name: "اللغة العربية", score: 47, max: 50, grade: "ممتاز" },
+          { name: "اللغة الإنجليزية", score: 45, max: 50, grade: "ممتاز" },
+          { name: "الرياضيات", score: 46, max: 50, grade: "ممتاز" },
+          { name: "العلوم", score: 39, max: 40, grade: "ممتاز" },
+          { name: "الدراسات", score: 38, max: 40, grade: "جيد جدًا" }
+        ],
+        extras: [
+          { name: "التربية الدينية", score: 19, status: "ناجح" },
+          { name: "الحاسب الآلي", score: 20, status: "ناجح" }
+        ]
+      },
+      {
+        seatNumber: "1002",
+        name: "سارة محمود حسن",
+        grade: "الصف الثالث الإعدادي",
+        school: "مدرسة السلام الإعدادية",
+        department: "إدارة غرب التعليمية",
+        total: 228,
+        maxTotal: 280,
+        percentage: 81.4,
+        coreTotal: 119,
+        coreMax: 140,
+        finalStatus: "ناجحة",
+        term1Result: "110 درجة - ناجحة",
+        term2Result: "118 درجة - ناجحة",
+        subjects: [
+          { name: "اللغة العربية", score: 42, max: 50, grade: "جيد جدًا" },
+          { name: "اللغة الإنجليزية", score: 38, max: 50, grade: "جيد" },
+          { name: "الرياضيات", score: 40, max: 50, grade: "جيد جدًا" },
+          { name: "العلوم", score: 36, max: 40, grade: "جيد جدًا" },
+          { name: "الدراسات", score: 34, max: 40, grade: "جيد" }
+        ],
+        extras: [
+          { name: "التربية الدينية", score: 17, status: "ناجحة" },
+          { name: "الحاسب الآلي", score: 19, status: "ناجحة" }
+        ]
+      },
+      {
+        seatNumber: "1003",
+        name: "محمد خالد إبراهيم",
+        grade: "الصف الثالث الإعدادي",
+        school: "مدرسة النهضة الإعدادية",
+        department: "إدارة وسط التعليمية",
+        total: 118,
+        maxTotal: 280,
+        percentage: 42.1,
+        coreTotal: 58,
+        coreMax: 140,
+        finalStatus: "راسب",
+        term1Result: "55 درجة - راسب",
+        term2Result: "63 درجة - راسب",
+        subjects: [
+          { name: "اللغة العربية", score: 21, max: 50, grade: "ضعيف" },
+          { name: "اللغة الإنجليزية", score: 18, max: 50, grade: "ضعيف" },
+          { name: "الرياضيات", score: 22, max: 50, grade: "ضعيف" },
+          { name: "العلوم", score: 14, max: 40, grade: "ضعيف" },
+          { name: "الدراسات", score: 13, max: 40, grade: "ضعيف" }
+        ],
+        extras: [
+          { name: "التربية الدينية", score: 11, status: "راسب" },
+          { name: "الحاسب الآلي", score: 10, status: "راسب" }
+        ]
+      }
+    ];
+
+    let currentStudent = null;
+
+    const seatInput = document.getElementById("seatNumber");
+    const searchBtn = document.getElementById("searchBtn");
+    const statusText = document.getElementById("statusText");
+    const resultSection = document.getElementById("resultSection");
+    const emptyState = document.getElementById("emptyState");
+
+    function setStatus(text, color = "#e2e8f0"){
+      statusText.textContent = text;
+      statusText.style.color = color;
+    }
+
+    function findStudentBySeat(seatNumber){
+      return demoStudents.find(s => String(s.seatNumber) === String(seatNumber).trim());
+    }
+
+    function safeText(value, fallback = "—"){
+      if (value === null || value === undefined || value === "") return fallback;
+      return value;
+    }
+
+    function getGradeFromPercentage(percentage){
+      const p = Number(percentage) || 0;
+      if (p >= 85) return "ممتاز";
+      if (p >= 75) return "جيد جدًا";
+      if (p >= 65) return "جيد";
+      if (p >= 50) return "مقبول";
+      return "ضعيف";
+    }
+
+    function getGradeIcon(grade){
+      switch (grade) {
+        case "ممتاز": return "🏆";
+        case "جيد جدًا": return "🥇";
+        case "جيد": return "👍";
+        case "مقبول": return "✅";
+        default: return "⚠";
+      }
+    }
+
+    function getPassFail(student){
+      if (student.finalStatus) {
+        const status = String(student.finalStatus).trim();
+        if (status.includes("ناج")) return "ناجح";
+        if (status.includes("راسب")) return "راسب";
+      }
+      const percentage = Number(student.percentage) || 0;
+      return percentage >= 50 ? "ناجح" : "راسب";
+    }
+
+    function fillTableRows(tbodyId, rows, cols){
+      const tbody = document.getElementById(tbodyId);
+      tbody.innerHTML = "";
+
+      if (!rows || !rows.length){
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        td.colSpan = cols;
+        td.textContent = "لا توجد بيانات";
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+      }
+
+      rows.forEach(row => {
+        const tr = document.createElement("tr");
+        row.forEach(cell => {
+          const td = document.createElement("td");
+          td.textContent = safeText(cell);
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+    }
+
+    function updatePassFailCard(passFailText){
+      const card = document.getElementById("passFailCard");
+      const icon = document.getElementById("passFailIcon");
+      const text = document.getElementById("passFailBox");
+
+      card.classList.remove("stat-pass", "stat-fail");
+
+      if (passFailText === "ناجح"){
+        card.classList.add("stat-pass");
+        icon.textContent = "✔";
+        text.textContent = "ناجح";
+      } else {
+        card.classList.add("stat-fail");
+        icon.textContent = "✖";
+        text.textContent = "راسب";
+      }
+    }
+
+    function renderResult(student){
+      currentStudent = student;
+
+      document.getElementById("studentName").textContent = safeText(student.name);
+      document.getElementById("seatValue").textContent = safeText(student.seatNumber);
+      document.getElementById("gradeClassValue").textContent = safeText(student.grade);
+      document.getElementById("schoolValue").textContent = safeText(student.school);
+      document.getElementById("departmentValue").textContent = safeText(student.department);
+      document.getElementById("totalScore").textContent = safeText(student.total, 0);
+      document.getElementById("maxScore").textContent = safeText(student.maxTotal, 280);
+      document.getElementById("percentageValue").textContent = safeText(student.percentage, 0);
+      document.getElementById("coreTotal").textContent = safeText(student.coreTotal, 0);
+      document.getElementById("coreMax").textContent = safeText(student.coreMax, 140);
+      document.getElementById("finalStatus").textContent = safeText(student.finalStatus);
+      document.getElementById("term1Result").textContent = safeText(student.term1Result || student.firstTerm || student.term1Total);
+      document.getElementById("term2Result").textContent = safeText(student.term2Result || student.secondTerm || student.term2Total);
+
+      const gradeText = getGradeFromPercentage(student.percentage);
+      const passFailText = getPassFail(student);
+
+      document.getElementById("gradeValueBox").textContent = gradeText;
+      document.getElementById("gradeIcon").textContent = getGradeIcon(gradeText);
+      updatePassFailCard(passFailText);
+
+      fillTableRows(
+        "subjectsBody",
+        (student.subjects || []).map(sub => [sub.name, sub.score, sub.max, sub.grade]),
+        4
+      );
+
+      fillTableRows(
+        "extraBody",
+        (student.extras || []).map(sub => [sub.name, sub.score, sub.status]),
+        3
+      );
+
+      resultSection.style.display = "block";
+      emptyState.style.display = "none";
+    }
+
+    function searchResult(){
+      const seatNumber = seatInput.value.trim();
+
+      if (!seatNumber){
+        setStatus("من فضلك أدخل رقم الجلوس أولًا", "#fecaca");
+        resultSection.style.display = "none";
+        emptyState.style.display = "block";
+        return;
+      }
+
+      setStatus("جاري البحث عن نتيجتك…", "#bfdbfe");
+
+      setTimeout(() => {
+        const student = findStudentBySeat(seatNumber);
+
+        if (!student){
+          setStatus("لم يتم العثور على نتيجة بهذا الرقم", "#fecaca");
+          resultSection.style.display = "none";
+          emptyState.style.display = "block";
+          return;
+        }
+
+        renderResult(student);
+        setStatus("تم العثور على النتيجة بنجاح", "#bbf7d0");
+        document.getElementById("resultSection").scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 450);
+    }
+
+    async function downloadImage(){
+      if (!currentStudent) return;
+
+      const element = document.getElementById("printArea");
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        scrollY: 0,
+        windowWidth: document.documentElement.scrollWidth,
+        windowHeight: document.documentElement.scrollHeight
+      });
+
+      const link = document.createElement("a");
+      link.download = `natiga-${currentStudent.seatNumber}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    }
+
+    async function downloadPDF(){
+      if (!currentStudent) return;
+
+      const element = document.getElementById("printArea");
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        scrollY: 0,
+        windowWidth: document.documentElement.scrollWidth,
+        windowHeight: document.documentElement.scrollHeight
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF("p", "mm", "a4");
+
+      const pageWidth = 210;
+      const pageHeight = 297;
+      const margin = 10;
+      const usableWidth = pageWidth - margin * 2;
+      const imgHeight = (canvas.height * usableWidth) / canvas.width;
+      const printableHeight = pageHeight - margin * 2;
+
+      if (imgHeight <= printableHeight){
+        pdf.addImage(imgData, "PNG", margin, margin, usableWidth, imgHeight);
+      } else {
+        let heightLeft = imgHeight;
+        let position = margin;
+
+        pdf.addImage(imgData, "PNG", margin, position, usableWidth, imgHeight);
+        heightLeft -= printableHeight;
+
+        while (heightLeft > 0){
+          position = heightLeft - imgHeight + margin;
+          pdf.addPage();
+          pdf.addImage(imgData, "PNG", margin, position, usableWidth, imgHeight);
+          heightLeft -= printableHeight;
+        }
+      }
+
+      pdf.save(`natiga-${currentStudent.seatNumber}.pdf`);
+    }
+
+    function printResult(){
+      if (!currentStudent) return;
+      window.print();
+    }
+
+    function shareWhatsApp(){
+      if (!currentStudent) return;
+
+      const message = [
+        "🎓 نتيجة الطالب",
+        `الاسم: ${safeText(currentStudent.name, "-")}`,
+        `رقم الجلوس: ${safeText(currentStudent.seatNumber, "-")}`,
+        `الصف: ${safeText(currentStudent.grade, "-")}`,
+        `التقدير العام: ${safeText(document.getElementById("gradeValueBox").textContent, "—")}`,
+        `الحالة: ${safeText(document.getElementById("passFailBox").textContent, "—")}`,
+        `الفصل الدراسي الأول: ${safeText(currentStudent.term1Result || currentStudent.firstTerm || currentStudent.term1Total, "غير متوفر")}`,
+        `الفصل الدراسي الثاني: ${safeText(currentStudent.term2Result || currentStudent.secondTerm || currentStudent.term2Total, "غير متوفر")}`,
+        `المجموع: ${safeText(currentStudent.total, "-")} / ${safeText(currentStudent.maxTotal, "-")}`,
+        `النسبة: ${safeText(currentStudent.percentage, "-")}%`,
+        "",
+        "🔗 رابط الموقع:",
+        SITE_URL,
+        "",
+        `برمجة ${DEVELOPER_NAME}`
+      ].join("\\n");
+
+      const waUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+      window.open(waUrl, "_blank");
+    }
+
+    async function nativeShare(){
+      const shareText = `🎓 نتيجة الطالب\\n🔗 ${SITE_URL}\\nبرمجة ${DEVELOPER_NAME}`;
+      if (navigator.share){
+        try {
+          await navigator.share({
+            title: "نتيجة الطالب",
+            text: shareText,
+            url: SITE_URL
+          });
+        } catch (e) {}
+      } else {
+        window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank");
+      }
+    }
+
+    searchBtn.addEventListener("click", searchResult);
+    seatInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") searchResult();
+    });
+
+    document.getElementById("downloadImageBtn").addEventListener("click", downloadImage);
+    document.getElementById("downloadPdfBtn").addEventListener("click", downloadPDF);
+    document.getElementById("printBtn").addEventListener("click", printResult);
+    document.getElementById("whatsappBtn").addEventListener("click", shareWhatsApp);
+    document.getElementById("nativeShareBtn").addEventListener("click", (e) => {
+      e.preventDefault();
+      nativeShare();
+    });
+
+    document.getElementById("scrollToSearch").addEventListener("click", (e) => {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      seatInput.focus();
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const seatFromUrl = urlParams.get("seat");
+
+    if (seatFromUrl){
+      seatInput.value = seatFromUrl;
+      searchResult();
+    }
+  </script>
 </body>
 </html>
