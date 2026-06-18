@@ -2,10 +2,11 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎓 نتيجة الطالب</title>
-  <meta name="description" content="نظام الاستعلام عن نتائج الامتحانات" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>🎓 نتيجة الطالب | نظام حديث</title>
+  <meta name="description" content="نظام الاستعلام عن نتائج الامتحانات بتصميم عصري ومتجاوب" />
 
+  <!-- Open Graph / Social Media -->
   <meta property="og:title" content="نتيجة الطالب - نظام الاستعلام عن النتائج" />
   <meta property="og:description" content="استعلم عن نتيجة الطالب بسهولة ومشاركة النتيجة مع الأهل والأصدقاء." />
   <meta property="og:type" content="website" />
@@ -14,911 +15,867 @@
   <meta property="og:locale" content="ar_AR" />
 
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="نتيجة الطالب - نظام الاستعلام عن النتائج" />
-  <meta name="twitter:description" content="استعلام سريع عن النتائج الدراسية ومشاركة النتيجة." />
-  <meta name="twitter:image" content="https://mohamednasr5.github.io/natega/preview.png" />
+  <meta name="twitter:title" content="نتيجة الطالب" />
+  <meta name="twitter:description" content="استعلام سريع عن النتائج الدراسية." />
 
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
   <style>
-    :root{
-      --bg1:#0f172a;
-      --bg2:#1e293b;
-      --card:#ffffff;
-      --text:#0f172a;
-      --muted:#64748b;
-      --line:#e2e8f0;
-      --soft:#f8fafc;
-      --shadow:0 15px 40px rgba(15,23,42,.12);
-
-      --green:#16a34a;
-      --green2:#15803d;
-      --greenSoft:#ecfdf5;
-      --greenBorder:#bbf7d0;
-
-      --blue:#2563eb;
-      --blue2:#1d4ed8;
-
-      --orange:#f59e0b;
-      --orange2:#ea580c;
-      --orangeSoft:#fff7ed;
-      --orangeBorder:#fed7aa;
-
-      --purple:#8b5cf6;
-      --purple2:#7c3aed;
-      --purpleSoft:#f5f3ff;
-      --purpleBorder:#ddd6fe;
-
-      --red:#dc2626;
-      --redSoft:#fef2f2;
-      --redBorder:#fecaca;
-    }
-
-    *{
-      box-sizing:border-box;
-      margin:0;
-      padding:0;
-    }
-
-    body{
-      font-family:"Cairo",sans-serif;
-      background:
-        radial-gradient(circle at top right, rgba(37,99,235,.18), transparent 22%),
-        linear-gradient(135deg, var(--bg1), var(--bg2));
-      color:#fff;
-      min-height:100vh;
-      padding:24px 14px 80px;
-    }
-
-    a{
-      color:inherit;
-      text-decoration:none;
-    }
-
-    .container{
-      width:min(100%, 1080px);
-      margin:auto;
-    }
-
-    .hero{
-      text-align:center;
-      margin-bottom:24px;
-    }
-
-    .hero h1{
-      font-size:clamp(1.8rem, 4vw, 2.8rem);
-      margin-bottom:8px;
-      font-weight:800;
-    }
-
-    .hero p{
-      color:#dbeafe;
-      font-size:1rem;
-    }
-
-    .search-card{
-      background:rgba(255,255,255,.1);
-      backdrop-filter:blur(10px);
-      border:1px solid rgba(255,255,255,.14);
-      border-radius:24px;
-      padding:18px;
-      box-shadow:0 15px 40px rgba(15,23,42,.12);
-      margin-bottom:24px;
-    }
-
-    .search-grid{
-      display:grid;
-      grid-template-columns:1fr auto;
-      gap:12px;
-      align-items:center;
-    }
-
-    .seat-input{
-      width:100%;
-      border:none;
-      outline:none;
-      background:#fff;
-      color:#111827;
-      border-radius:16px;
-      padding:16px 18px;
-      font-size:1.05rem;
-      font-family:inherit;
-      box-shadow:0 8px 20px rgba(0,0,0,.12);
-    }
-
-    .btn{
-      border:none;
-      outline:none;
-      cursor:pointer;
-      font-family:inherit;
-      border-radius:16px;
-      padding:14px 18px;
-      font-size:1rem;
-      font-weight:700;
-      transition:.2s ease;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      min-height:52px;
-    }
-
-    .btn:hover{
-      transform:translateY(-1px);
-    }
-
-    .btn-primary{
-      background:linear-gradient(135deg, var(--blue), var(--blue2));
-      color:#fff;
-      box-shadow:0 10px 24px rgba(37,99,235,.28);
-    }
-
-    .btn-soft{
-      background:#fff;
-      color:var(--text);
-    }
-
-    .btn-green{
-      background:#16a34a;
-      color:#fff;
-    }
-
-    .btn-orange{
-      background:#ea580c;
-      color:#fff;
-    }
-
-    .btn-dark{
-      background:#111827;
-      color:#fff;
-    }
-
-    .status{
-      margin-top:12px;
-      font-size:.98rem;
-      color:#e2e8f0;
-      min-height:28px;
-      text-align:center;
-    }
-
-    .result-wrap{
-      display:none;
-    }
-
-    .result-card{
-      background:var(--card);
-      color:var(--text);
-      border-radius:28px;
-      box-shadow:0 15px 40px rgba(15,23,42,.12);
-      overflow:visible;
-      border:1px solid rgba(226,232,240,.9);
-    }
-
-    .result-head{
-      background:linear-gradient(135deg, #eff6ff, #dbeafe);
-      padding:24px;
-      border-bottom:1px solid var(--line);
-    }
-
-    .result-title{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-    }
-
-    .result-title h2{
-      font-size:1.5rem;
-      color:#0f172a;
-    }
-
-    .badge{
-      background:#fff;
-      color:#16a34a;
-      border:1px solid #bbf7d0;
-      border-radius:999px;
-      padding:8px 14px;
-      font-size:.92rem;
-      font-weight:700;
-    }
-
-    .student-name{
-      margin-top:12px;
-      font-size:1.35rem;
-      color:#111827;
-      font-weight:800;
-    }
-
-    .result-body{
-      padding:24px;
-    }
-
-    .info-grid{
-      display:grid;
-      grid-template-columns:repeat(2, minmax(0, 1fr));
-      gap:14px;
-      margin-bottom:20px;
-    }
-
-    .info-box{
-      background:var(--soft);
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:16px;
-    }
-
-    .info-box .label{
-      display:block;
-      color:var(--muted);
-      font-size:.9rem;
-      margin-bottom:6px;
-    }
-
-    .info-box .value{
-      display:block;
-      color:#0f172a;
-      font-size:1.05rem;
-      font-weight:700;
-      word-break:break-word;
-    }
-
-    .totals-grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fit, minmax(185px, 1fr));
-      gap:16px;
-      margin-bottom:20px;
-    }
-
-    .stat{
-      border-radius:22px;
-      padding:22px 18px;
-      min-height:190px;
-      text-align:center;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      border:1px solid transparent;
-    }
-
-    .stat-icon{
-      width:76px;
-      height:76px;
-      border-radius:50%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:2.1rem;
-      font-weight:800;
-      margin-bottom:14px;
-    }
-
-    .stat h3{
-      font-size:1rem;
-      margin-bottom:8px;
-      color:inherit;
-      opacity:.95;
-    }
-
-    .stat .big{
-      font-size:2rem;
-      font-weight:800;
-      line-height:1.2;
-      color:inherit;
-    }
-
-    .stat .small{
-      display:block;
-      margin-top:8px;
-      font-size:.95rem;
-      color:inherit;
-      opacity:.9;
-    }
-
-    .stat-total{
-      background:var(--greenSoft);
-      color:var(--green);
-      border-color:var(--greenBorder);
-    }
-
-    .stat-total .stat-icon{
-      background:#dcfce7;
-      color:var(--green);
-    }
-
-    .stat-grade{
-      background:var(--purpleSoft);
-      color:var(--purple2);
-      border-color:var(--purpleBorder);
-    }
-
-    .stat-grade .stat-icon{
-      background:#ede9fe;
-      color:var(--purple2);
-    }
-
-    .stat-percent{
-      background:#ecfeff;
-      color:#0891b2;
-      border-color:#bae6fd;
-    }
-
-    .stat-percent .stat-icon{
-      background:#cffafe;
-      color:#0891b2;
-    }
-
-    .stat-core{
-      background:var(--orangeSoft);
-      color:var(--orange2);
-      border-color:var(--orangeBorder);
-    }
-
-    .stat-core .stat-icon{
-      background:#ffedd5;
-      color:var(--orange2);
-    }
-
-    .stat-pass{
-      background:var(--greenSoft);
-      color:var(--green);
-      border-color:var(--greenBorder);
-    }
-
-    .stat-pass .stat-icon{
-      background:#dcfce7;
-      color:var(--green);
-    }
-
-    .stat-fail{
-      background:var(--redSoft);
-      color:var(--red);
-      border-color:var(--redBorder);
-    }
-
-    .stat-fail .stat-icon{
-      background:#fee2e2;
-      color:var(--red);
-    }
-
-    .section-title{
-      font-size:1.1rem;
-      color:#111827;
-      margin:18px 0 12px;
-      font-weight:800;
-    }
-
-    .term-results{
-      display:grid;
-      grid-template-columns:repeat(2, minmax(0, 1fr));
-      gap:14px;
-      margin-bottom:20px;
-    }
-
-    .term-box{
-      background:#fff7ed;
-      border:1px solid #fed7aa;
-      border-radius:18px;
-      padding:16px;
-    }
-
-    .term-box h3{
-      color:#9a3412;
-      font-size:1rem;
-      margin-bottom:8px;
-    }
-
-    .term-box p{
-      color:#7c2d12;
-      font-size:1.1rem;
-      font-weight:800;
-    }
-
-    table{
-      width:100%;
-      border-collapse:collapse;
-      overflow:hidden;
-      border-radius:18px;
-      border:1px solid var(--line);
-      background:#fff;
-    }
-
-    th, td{
-      padding:14px 12px;
-      text-align:right;
-      border-bottom:1px solid var(--line);
-      font-size:.97rem;
-    }
-
-    th{
-      background:#f8fafc;
-      color:#334155;
-      font-weight:800;
-    }
-
-    tr:last-child td{
-      border-bottom:none;
-    }
-
-    .action-bar{
-      display:grid;
-      grid-template-columns:repeat(4, minmax(0, 1fr));
-      gap:12px;
-      margin-top:20px;
-    }
-
-    .footer-note{
-      margin-top:22px;
-      text-align:center;
-      background:#f8fafc;
-      color:#334155;
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:16px;
-      line-height:1.9;
-    }
-
-    .footer-note strong{
-      color:#0f172a;
-    }
-
-    .footer-nav{
-      margin-top:18px;
-      display:flex;
-      flex-wrap:wrap;
-      justify-content:center;
-      gap:12px;
-    }
-
-    .footer-nav a{
-      background:#fff;
-      color:#0f172a;
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:10px 14px;
-      font-weight:700;
-    }
-
-    .empty-state{
-      text-align:center;
-      color:#fff;
-      opacity:.95;
-      margin-top:10px;
-    }
-
-    .no-print{
-      display:inline-flex;
-    }
-
-    @media (max-width: 768px){
-      .search-grid,
-      .info-grid,
-      .term-results,
-      .action-bar{
-        grid-template-columns:1fr;
-      }
-
-      .totals-grid{
-        grid-template-columns:repeat(2, minmax(0, 1fr));
-      }
-
-      .result-head,
-      .result-body{
-        padding:18px;
-      }
-
-      .student-name{
-        font-size:1.15rem;
-      }
-
-      .stat{
-        min-height:170px;
-        padding:18px 14px;
-      }
-
-      .stat .big{
-        font-size:1.65rem;
-      }
-
-      .stat-icon{
-        width:64px;
-        height:64px;
-        font-size:1.8rem;
-      }
-
-      th, td{
-        font-size:.92rem;
-        padding:12px 10px;
-      }
-    }
-
-    @media (max-width: 480px){
-      .totals-grid{
-        grid-template-columns:1fr;
-      }
-    }
-
-    @page{
-      size:A4 portrait;
-      margin:10mm;
-    }
-
-    @media print{
-      body{
-        background:#fff !important;
-        padding:0 !important;
-      }
-
-      body *{
-        visibility:hidden !important;
-      }
-
-      #printArea, #printArea *{
-        visibility:visible !important;
-      }
-
-      #printArea{
-        position:absolute !important;
-        inset:0 auto auto 0 !important;
-        width:190mm !important;
-        margin:0 !important;
-        padding:0 !important;
-      }
-
-      .result-card{
-        width:190mm !important;
-        margin:0 !important;
-        box-shadow:none !important;
-        border:1px solid #ddd !important;
-        border-radius:0 !important;
-        overflow:visible !important;
-      }
-
-      .no-print{
-        display:none !important;
-      }
-
-      .result-wrap{
-        display:block !important;
-      }
-
-      .footer-note,
-      table,
-      .term-box,
-      .info-box,
-      .stat{
-        break-inside:avoid;
-      }
+    :root {
+      /* Colors Palette */
+      --primary: #3b82f6;
+      --primary-dark: #1d4ed8;
+      --secondary: #64748b;
+      --accent: #f59e0b;
+      
+      --bg-dark: #0f172a;
+      --bg-gradient-start: #1e293b;
+      --bg-gradient-end: #0f172a;
+      
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --glass-bg: rgba(255, 255, 255, 0.08);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      
+      --text-main: #1e293b;
+      --text-light: #f8fafc;
+      --text-muted: #94a3b8;
+
+      --success: #10b981;
+      --success-bg: #d1fae5;
+      --danger: #ef4444;
+      --danger-bg: #fee2e2;
+      --warning: #f59e0b;
+
+      /* Shadows */
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+      --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+
+      /* Radius */
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --radius-xl: 28px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: "Cairo", sans-serif;
+      background: radial-gradient(circle at top right, #3b82f620, transparent 40%),
+                  radial-gradient(circle at bottom left, #8b5cf620, transparent 40%),
+                  linear-gradient(to bottom, var(--bg-gradient-start), var(--bg-gradient-end));
+      background-attachment: fixed;
+      color: var(--text-light);
+      min-height: 100vh;
+      padding: 20px;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Animated Background Shapes */
+    .shape {
+      position: absolute;
+      filter: blur(80px);
+      z-index: -1;
+      opacity: 0.6;
+      animation: float 20s infinite ease-in-out;
+    }
+    .shape-1 {
+      top: -10%;
+      right: -10%;
+      width: 400px;
+      height: 400px;
+      background: #3b82f6;
+      animation-delay: 0s;
+    }
+    .shape-2 {
+      bottom: -10%;
+      left: -10%;
+      width: 350px;
+      height: 350px;
+      background: #8b5cf6;
+      animation-delay: -5s;
+    }
+    .shape-3 {
+      top: 40%;
+      left: 50%;
+      width: 200px;
+      height: 200px;
+      background: #ec4899;
+      animation-delay: -10s;
+      opacity: 0.3;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(30px, -30px); }
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header & Hero */
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding-top: 20px;
+      animation: fadeInDown 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    header h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 900;
+      background: linear-gradient(135deg, #fff 0%, #93c5fd 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+      text-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.5);
+    }
+
+    header p {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Search Section */
+    .search-wrapper {
+      max-width: 600px;
+      margin: 0 auto 40px;
+      animation: fadeInUp 0.8s 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+    }
+
+    .search-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-xl);
+      padding: 10px;
+      display: flex;
+      gap: 10px;
+      box-shadow: var(--shadow-glow);
+      transition: transform 0.3s ease;
+    }
+
+    .search-card:focus-within {
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .seat-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      outline: none;
+      padding: 0 20px;
+      border-radius: var(--radius-lg);
+      color: #fff;
+      font-size: 1.1rem;
+      font-family: inherit;
+      transition: background 0.3s;
+    }
+
+    .seat-input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .seat-input:focus {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .btn {
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      border-radius: var(--radius-lg);
+      padding: 0 24px;
+      font-size: 1rem;
+      font-weight: 700;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 52px;
+      white-space: nowrap;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn:active::after {
+      width: 200px;
+      height: 200px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .btn-success { background: var(--success); color: white; }
+    .btn-whatsapp { background: #25D366; color: white; }
+    .btn-print { background: #333; color: white; }
+
+    /* Loader */
+    .loader {
+      width: 20px;
+      height: 20px;
+      border: 3px solid #ffffff;
+      border-bottom-color: transparent;
+      border-radius: 50%;
+      display: inline-block;
+      box-sizing: border-box;
+      animation: rotation 1s linear infinite;
+      display: none;
+    }
+
+    @keyframes rotation {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .status-msg {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 0.95rem;
+      height: 24px;
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: var(--text-muted);
+      margin-top: 40px;
+      font-size: 1.2rem;
+      animation: fadeIn 1s 0.5s forwards;
+      opacity: 0;
+    }
+
+    /* Result Card Section */
+    .result-wrap {
+      display: none;
+    }
+
+    .result-card {
+      background: var(--card-bg);
+      color: var(--text-main);
+      border-radius: var(--radius-xl);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.5);
+    }
+
+    /* Header of Result Card */
+    .result-head {
+      background: linear-gradient(135deg, #eff6ff, #dbeafe);
+      padding: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .result-head::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 200px;
+      height: 200px;
+      background: rgba(59, 130, 246, 0.05);
+      border-radius: 50%;
+    }
+
+    .badge {
+      background: #fff;
+      color: var(--success);
+      padding: 6px 16px;
+      border-radius: 50px;
+      font-weight: 800;
+      font-size: 0.9rem;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--success-bg);
+      display: inline-block;
+    }
+    
+    .badge.fail {
+      color: var(--danger);
+      background: #fff;
+      border-color: var(--danger-bg);
+    }
+
+    .student-name {
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin-top: 15px;
+      color: #0f172a;
+    }
+
+    .result-body {
+      padding: 30px;
+    }
+
+    /* Info Grid */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .info-box {
+      background: #f8fafc;
+      padding: 15px;
+      border-radius: var(--radius-md);
+      border: 1px solid #e2e8f0;
+      transition: transform 0.2s;
+    }
+    
+    .info-box:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+
+    .info-label {
+      font-size: 0.85rem;
+      color: var(--secondary);
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .info-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      word-break: break-word;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      padding: 20px;
+      border-radius: var(--radius-lg);
+      text-align: center;
+      border: 1px solid transparent;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .stat-icon {
+      font-size: 2rem;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 900;
+      line-height: 1.2;
+      display: block;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-top: 5px;
+      display: block;
+    }
+
+    /* Stat Variants */
+    .stat-total { background: var(--success-bg); color: #065f46; border-color: #a7f3d0; }
+    .stat-grade { background: #f3e8ff; color: #6b21a8; border-color: #e9d5ff; }
+    .stat-percent { background: #cffafe; color: #0e7490; border-color: #a5f3fc; }
+    .stat-core { background: #ffedd5; color: #9a3412; border-color: #fed7aa; }
+    .stat-pass { background: var(--success-bg); color: #065f46; border-color: #a7f3d0; }
+    .stat-fail { background: var(--danger-bg); color: #991b1b; border-color: #fecaca; }
+
+    /* Tables */
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin: 25px 0 15px;
+      padding-right: 12px;
+      border-right: 4px solid var(--primary);
+      color: #1e293b;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      min-width: 500px; /* Force scroll on mobile */
+    }
+
+    th, td {
+      padding: 14px 16px;
+      text-align: right;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    th {
+      background: #f8fafc;
+      color: #64748b;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background-color: #f8fafc; }
+
+    /* Footer & Actions */
+    .footer-note {
+      margin-top: 30px;
+      padding: 20px;
+      background: #f8fafc;
+      border-radius: var(--radius-md);
+      text-align: center;
+      font-size: 0.9rem;
+      color: #64748b;
+      border: 1px dashed #cbd5e1;
+    }
+
+    .action-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 25px;
+      justify-content: center;
+    }
+
+    /* Animation Classes */
+    .hidden { display: none !important; }
+    
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+      20%, 40%, 60%, 80% { transform: translateX(4px); }
+    }
+
+    .animate-in {
+      animation: fadeInUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      opacity: 0; /* Start hidden */
+    }
+    
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+
+    .shake-element {
+      animation: shake 0.5s ease-in-out;
+    }
+
+    /* Confetti */
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background-color: #f00;
+      animation: fall linear forwards;
+      z-index: 9999;
+    }
+    @keyframes fall {
+      to { transform: translateY(100vh) rotate(720deg); }
+    }
+
+    /* Mobile Optimization */
+    @media (max-width: 768px) {
+      header h1 { font-size: 2.2rem; }
+      .result-head, .result-body { padding: 20px; }
+      .student-name { font-size: 1.4rem; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .action-bar { grid-template-columns: 1fr; }
+      .btn { width: 100%; }
+      .table-container { border-radius: 0; margin: 0 -20px; }
+      table { border-radius: 0; }
+    }
+
+    @media print {
+      body { background: #fff; color: #000; padding: 0; }
+      .shape, .search-card, .action-bar, .empty-state, header { display: none !important; }
+      .result-wrap { display: block !important; }
+      .container { max-width: 100%; margin: 0; }
+      .result-card { box-shadow: none; border: none; border-radius: 0; }
+      .result-head, .result-body { padding: 0; }
+      .animate-in { opacity: 1 !important; animation: none !important; }
+      .confetti { display: none; }
     }
   </style>
 </head>
 <body>
+
+  <!-- Background Animated Shapes -->
+  <div class="shape shape-1"></div>
+  <div class="shape shape-2"></div>
+  <div class="shape shape-3"></div>
+
   <div class="container">
-    <header class="hero no-print">
+    <header>
       <h1>🎓 نتيجة الطالب</h1>
-      <p>نظام الاستعلام عن نتائج الامتحانات</p>
+      <p>نظام ذكي للاستعلام عن النتائج الدراسية</p>
     </header>
 
-    <section class="search-card no-print">
-      <div class="search-grid">
+    <!-- Search Section -->
+    <div class="search-wrapper no-print">
+      <div class="search-card">
         <input
           type="text"
           id="seatNumber"
           class="seat-input"
-          placeholder="أدخل رقم الجلوس"
+          placeholder="أدخل رقم الجلوس (الرقم القومي)..."
           inputmode="numeric"
+          autocomplete="off"
         />
-        <button class="btn btn-primary" id="searchBtn">🔎 بحث</button>
+        <button class="btn btn-primary" id="searchBtn">
+          <span class="btn-text">بحث</span>
+          <span class="loader"></span>
+        </button>
       </div>
-      <div class="status" id="statusText">أدخل رقم الجلوس ثم اضغط بحث</div>
-    </section>
-
-    <div class="empty-state no-print" id="emptyState">
-      لا توجد نتيجة معروضة الآن.
+      <div class="status-msg" id="statusText">أدخل رقم الجلوس للبدء</div>
     </div>
 
+    <!-- Empty State -->
+    <div class="empty-state no-print" id="emptyState">
+      <div style="font-size: 3rem; margin-bottom: 10px; opacity: 0.5;">🔍</div>
+      بانتظار البحث عن نتيجة...
+    </div>
+
+    <!-- Result Section -->
     <section class="result-wrap" id="resultSection">
       <div class="result-card" id="printArea">
-        <div class="result-head">
-          <div class="result-title">
-            <h2>بيان نتيجة الطالب</h2>
+        <!-- Header -->
+        <div class="result-head animate-in">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <h2 style="font-size: 1.2rem; color: #64748b;">بيان نتيجة طالب</h2>
             <span class="badge" id="finalStatus">—</span>
           </div>
           <div class="student-name" id="studentName">اسم الطالب</div>
         </div>
 
         <div class="result-body">
-          <div class="info-grid">
+          <!-- Info Grid -->
+          <div class="info-grid animate-in delay-1">
             <div class="info-box">
-              <span class="label">رقم الجلوس</span>
-              <span class="value" id="seatValue">—</span>
+              <span class="info-label">رقم الجلوس</span>
+              <span class="info-value" id="seatValue">—</span>
             </div>
             <div class="info-box">
-              <span class="label">الصف</span>
-              <span class="value" id="gradeClassValue">—</span>
+              <span class="info-label">الصف الدراسي</span>
+              <span class="info-value" id="gradeClassValue">—</span>
             </div>
             <div class="info-box">
-              <span class="label">المدرسة</span>
-              <span class="value" id="schoolValue">—</span>
+              <span class="info-label">المدرسة</span>
+              <span class="info-value" id="schoolValue">—</span>
             </div>
             <div class="info-box">
-              <span class="label">الإدارة</span>
-              <span class="value" id="departmentValue">—</span>
+              <span class="info-label">الإدارة التعليمية</span>
+              <span class="info-value" id="departmentValue">—</span>
             </div>
           </div>
 
-          <div class="totals-grid">
-            <div class="stat stat-total">
-              <div class="stat-icon">🧮</div>
-              <h3>المجموع الكلي</h3>
-              <div class="big"><span id="totalScore">0</span> / <span id="maxScore">140</span></div>
-              <span class="small">الإجمالي النهائي</span>
+          <!-- Stats Grid -->
+          <div class="stats-grid animate-in delay-2">
+            <div class="stat-card stat-total">
+              <span class="stat-icon">🧮</span>
+              <span class="stat-value" id="totalScore">0</span>
+              <span class="stat-label">من <span id="maxScore">140</span></span>
             </div>
 
-            <div class="stat stat-grade">
-              <div class="stat-icon" id="gradeIcon">🏅</div>
-              <h3>التقدير العام</h3>
-              <div class="big" id="gradeValueBox">—</div>
-              <span class="small">التقدير النهائي</span>
+            <div class="stat-card stat-grade">
+              <span class="stat-icon" id="gradeIcon">🏅</span>
+              <span class="stat-value" id="gradeValueBox">—</span>
+              <span class="stat-label">التقدير العام</span>
             </div>
 
-            <div class="stat stat-percent">
-              <div class="stat-icon">%</div>
-              <h3>النسبة المئوية</h3>
-              <div class="big"><span id="percentageValue">0</span>%</div>
-              <span class="small">نسبة النجاح</span>
+            <div class="stat-card stat-percent">
+              <span class="stat-icon">%</span>
+              <span class="stat-value" id="percentageValue">0</span>
+              <span class="stat-label">النسبة المئوية</span>
             </div>
 
-            <div class="stat stat-pass" id="passFailCard">
-              <div class="stat-icon" id="passFailIcon">✔</div>
-              <h3>حالة النتيجة</h3>
-              <div class="big" id="passFailBox">—</div>
-              <span class="small">ناجح أو راسب</span>
+            <div class="stat-card stat-pass" id="passFailCard">
+              <span class="stat-icon" id="passFailIcon">✅</span>
+              <span class="stat-value" id="passFailBox">—</span>
+              <span class="stat-label">الحالة</span>
             </div>
 
-            <div class="stat stat-core">
-              <div class="stat-icon">📚</div>
-              <h3>المواد الأساسية</h3>
-              <div class="big"><span id="coreTotal">0</span> / <span id="coreMax">140</span></div>
-              <span class="small">إجمالي المواد الأساسية</span>
+            <div class="stat-card stat-core">
+              <span class="stat-icon">📚</span>
+              <span class="stat-value" id="coreTotal">0</span>
+              <span class="stat-label">مجموع المواد الأساسية</span>
             </div>
           </div>
 
-          <h3 class="section-title">نتيجة الفصلين</h3>
-          <div class="term-results">
-            <div class="term-box">
-              <h3>الفصل الدراسي الأول</h3>
-              <p id="term1Result">غير متوفر</p>
+          <!-- Term Results -->
+          <h3 class="section-title animate-in delay-2">نتيجة الفصلين</h3>
+          <div class="info-grid animate-in delay-2">
+            <div class="info-box" style="background: #fff7ed; border-color: #fed7aa;">
+              <span class="info-label">الفصل الدراسي الأول</span>
+              <span class="info-value" id="term1Result" style="color: #c2410c;">—</span>
             </div>
-            <div class="term-box">
-              <h3>الفصل الدراسي الثاني</h3>
-              <p id="term2Result">غير متوفر</p>
+            <div class="info-box" style="background: #fff7ed; border-color: #fed7aa;">
+              <span class="info-label">الفصل الدراسي الثاني</span>
+              <span class="info-value" id="term2Result" style="color: #c2410c;">—</span>
             </div>
           </div>
 
-          <h3 class="section-title">المواد الأساسية</h3>
-          <table id="subjectsTable">
-            <thead>
-              <tr>
-                <th>المادة</th>
-                <th>الدرجة</th>
-                <th>النهاية الكبرى</th>
-                <th>التقدير</th>
-              </tr>
-            </thead>
-            <tbody id="subjectsBody">
-              <tr>
-                <td colspan="4">لا توجد بيانات</td>
-              </tr>
-            </tbody>
-          </table>
+          <!-- Subjects Table -->
+          <h3 class="section-title animate-in delay-3">تفاصيل الدرجات (المواد الأساسية)</h3>
+          <div class="table-container animate-in delay-3">
+            <table id="subjectsTable">
+              <thead>
+                <tr>
+                  <th>المادة</th>
+                  <th>الدرجة</th>
+                  <th>الإجمالي</th>
+                  <th>التقدير</th>
+                </tr>
+              </thead>
+              <tbody id="subjectsBody">
+                <!-- Data will be injected here -->
+              </tbody>
+            </table>
+          </div>
 
-          <h3 class="section-title">المواد خارج المجموع</h3>
-          <table id="extraTable">
-            <thead>
-              <tr>
-                <th>المادة</th>
-                <th>الدرجة</th>
-                <th>الحالة</th>
-              </tr>
-            </thead>
-            <tbody id="extraBody">
-              <tr>
-                <td colspan="3">لا توجد بيانات</td>
-              </tr>
-            </tbody>
-          </table>
+          <!-- Extra Subjects -->
+          <h3 class="section-title animate-in delay-3">المواد خارج المجموع</h3>
+          <div class="table-container animate-in delay-3">
+            <table id="extraTable">
+              <thead>
+                <tr>
+                  <th>المادة</th>
+                  <th>الدرجة</th>
+                  <th>الحالة</th>
+                </tr>
+              </thead>
+              <tbody id="extraBody">
+                <!-- Data will be injected here -->
+              </tbody>
+            </table>
+          </div>
 
-          <div class="footer-note">
-            برمجة وتطوير بكل حب ❤️<br>
-            <strong>المهندس محمد حماد</strong><br>
-            <a href="https://mohamednasr5.github.io/natega/" target="_blank">mohamednasr5.github.io/natega</a>
+          <!-- Footer -->
+          <div class="footer-note animate-in delay-4">
+            <p>تم استخراج هذه النتيجة آلياً من قاعدة البيانات الرسمية</p>
+            <p style="margin-top: 5px;">
+              برمجة وتطوير: <strong>المهندس محمد حماد</strong> ❤️
+            </p>
           </div>
         </div>
       </div>
 
+      <!-- Action Buttons -->
       <div class="action-bar no-print">
-        <button class="btn btn-soft" id="downloadImageBtn">🖼️ تحميل صورة</button>
-        <button class="btn btn-dark" id="downloadPdfBtn">📄 تحميل PDF</button>
-        <button class="btn btn-orange" id="printBtn">🖨️ طباعة A4</button>
-        <button class="btn btn-green" id="whatsappBtn">💬 واتساب</button>
-      </div>
-
-      <div class="footer-nav no-print">
-        <a href="https://mohamednasr5.github.io/natega/">الرئيسية</a>
-        <a href="#" id="scrollToSearch">بحث</a>
-        <a href="#" id="nativeShareBtn">مشاركة</a>
+        <button class="btn btn-secondary" id="downloadImageBtn">🖼️ صورة</button>
+        <button class="btn btn-secondary" id="downloadPdfBtn">📄 PDF</button>
+        <button class="btn btn-print" id="printBtn">🖨️ طباعة</button>
+        <button class="btn btn-whatsapp" id="whatsappBtn">💬 واتساب</button>
       </div>
     </section>
   </div>
 
+  <!-- Libraries for Export -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
   <script>
+    // --- Configuration ---
     const SITE_URL = "https://mohamednasr5.github.io/natega/";
     const API_URL = "https://natega.studegy10.workers.dev";
     const DEVELOPER_NAME = "المهندس محمد حماد";
 
-    let currentStudent = null;
-
+    // --- DOM Elements ---
     const seatInput = document.getElementById("seatNumber");
     const searchBtn = document.getElementById("searchBtn");
+    const btnText = document.querySelector(".btn-text");
+    const loader = document.querySelector(".loader");
     const statusText = document.getElementById("statusText");
     const resultSection = document.getElementById("resultSection");
     const emptyState = document.getElementById("emptyState");
+    const searchWrapper = document.querySelector(".search-wrapper");
 
-    function setStatus(text, color = "#e2e8f0"){
-      statusText.textContent = text;
-      statusText.style.color = color;
+    let currentStudent = null;
+
+    // --- Utility Functions ---
+    function safeText(value, fallback = "—") {
+      return (value === null || value === undefined || value === "") ? fallback : value;
     }
 
-    function safeText(value, fallback = "—"){
-      if (value === null || value === undefined || value === "") return fallback;
-      return value;
+    function parsePercentage(value) {
+      if (!value) return 0;
+      return parseFloat(String(value).replace("%", "").trim()) || 0;
     }
 
-    function parsePercentage(value){
-      if (value === null || value === undefined || value === "") return 0;
-      return parseFloat(String(value).replace("%","").trim()) || 0;
-    }
-
-    function getGradeFromPercentage(percentage){
+    function getGradeFromPercentage(percentage) {
       const p = Number(percentage) || 0;
       if (p >= 85) return "ممتاز";
-      if (p >= 75) return "جيد جدًا";
+      if (p >= 75) return "جيد جداً";
       if (p >= 65) return "جيد";
       if (p >= 50) return "مقبول";
       return "ضعيف";
     }
 
-    function getGradeIcon(grade){
-      switch (grade) {
-        case "ممتاز": return "🏆";
-        case "جيد جدًا": return "🥇";
-        case "جيد": return "👍";
-        case "مقبول": return "✅";
-        default: return "⚠";
+    function getGradeIcon(grade) {
+      const icons = {
+        "ممتاز": "🏆",
+        "جيد جداً": "🥇",
+        "جيد": "👍",
+        "مقبول": "✅",
+        "ضعيف": "⚠️"
+      };
+      return icons[grade] || "❓";
+    }
+
+    function updateStatus(msg, type = 'normal') {
+      statusText.textContent = msg;
+      statusText.style.color = type === 'error' ? '#f87171' : (type === 'success' ? '#4ade80' : '#94a3b8');
+    }
+
+    // --- Animation Logic ---
+    function triggerConfetti() {
+      const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+      for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.classList.add('confetti');
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.top = -10 + 'px';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+        confetti.style.opacity = Math.random();
+        document.body.appendChild(confetti);
+        
+        setTimeout(() => confetti.remove(), 4000);
       }
     }
 
-    function getPassFail(student){
-      if (student.finalStatus) {
-        const status = String(student.finalStatus).trim();
-        if (status.includes("ناج")) return "ناجح";
-        if (status.includes("راسب")) return "راسب";
-      }
-      const percentage = Number(student.percentage) || 0;
-      return percentage >= 50 ? "ناجح" : "راسب";
-    }
+    // --- Data Fetching ---
+    async function fetchStudentData(seatNumber) {
+      try {
+        const res = await fetch(`${API_URL}/?seat=${encodeURIComponent(seatNumber)}`);
+        const json = await res.json();
 
-    function scoreStatus(score, passMark){
-      return Number(score) >= Number(passMark) ? "ناجح" : "راسب";
-    }
+        if (!json.ok || !json.data) return null;
 
-    function subjectGrade(score, max){
-      const p = (Number(score) / Number(max)) * 100;
-      if (p >= 85) return "ممتاز";
-      if (p >= 75) return "جيد جدًا";
-      if (p >= 65) return "جيد";
-      if (p >= 50) return "مقبول";
-      return "ضعيف";
-    }
-
-    async function fetchStudentBySeat(seatNumber){
-      const res = await fetch(`${API_URL}/?seat=${encodeURIComponent(seatNumber)}`);
-      const json = await res.json();
-
-      if (!json.ok || !json.data) {
+        const d = json.data;
+        const percentage = parsePercentage(d.percentage);
+        
+        // Helper to get grade for a specific subject
+        const getSubjGrade = (score, max) => getGradeFromPercentage((Number(score) / Number(max)) * 100);
+        
+        return {
+          seatNumber: d.seat_no,
+          name: d.student_name,
+          grade: d.grade_name,
+          school: d.school_name,
+          department: d.admin_name,
+          total: d.total,
+          maxTotal: 140,
+          percentage: percentage,
+          coreTotal: d.total,
+          finalStatus: percentage >= 50 ? "ناجح" : "راسب",
+          finalGrade: d.grade || getGradeFromPercentage(percentage),
+          term1Result: d.level1 || "غير متوفر",
+          term2Result: d.level2 || "غير متوفر",
+          subjects: [
+            { name: "اللغة العربية", score: d.ar, max: 40, grade: getSubjGrade(d.ar, 40) },
+            { name: "اللغة الإنجليزية", score: d.en, max: 30, grade: getSubjGrade(d.en, 30) },
+            { name: "الدراسات", score: d.studies, max: 20, grade: getSubjGrade(d.studies, 20) },
+            { name: "الجبر", score: d.algebra, max: 15, grade: getSubjGrade(d.algebra, 15) },
+            { name: "الهندسة", score: d.geometry, max: 15, grade: getSubjGrade(d.geometry, 15) },
+            { name: "الرياضيات", score: d.math_total, max: 30, grade: getSubjGrade(d.math_total, 30) },
+            { name: "العلوم", score: d.science, max: 20, grade: getSubjGrade(d.science, 20) }
+          ],
+          extras: [
+            { name: "التربية الدينية", score: d.religion },
+            { name: "التربية الفنية", score: d.art },
+            { name: "الحاسب الآلي", score: d.computer }
+          ]
+        };
+      } catch (error) {
+        console.error("API Error:", error);
         return null;
       }
-
-      const d = json.data;
-      const percentage = parsePercentage(d.percentage);
-      const finalGrade = d.grade || getGradeFromPercentage(percentage);
-      const finalStatus = percentage >= 50 ? "ناجح" : "راسب";
-
-      return {
-        seatNumber: d.seat_no,
-        name: d.student_name,
-        grade: d.grade_name,
-        school: d.school_name,
-        department: d.admin_name,
-        total: d.total,
-        maxTotal: 140,
-        percentage: percentage,
-        coreTotal: d.total,
-        coreMax: 140,
-        finalStatus: finalStatus,
-        finalGrade: finalGrade,
-        term1Result: d.level1 || "غير متوفر",
-        term2Result: d.level2 || "غير متوفر",
-        subjects: [
-          { name: "اللغة العربية", score: d.ar, max: 40, grade: subjectGrade(d.ar, 40) },
-          { name: "اللغة الإنجليزية", score: d.en, max: 30, grade: subjectGrade(d.en, 30) },
-          { name: "الدراسات", score: d.studies, max: 20, grade: subjectGrade(d.studies, 20) },
-          { name: "الجبر", score: d.algebra, max: 15, grade: subjectGrade(d.algebra, 15) },
-          { name: "الهندسة", score: d.geometry, max: 15, grade: subjectGrade(d.geometry, 15) },
-          { name: "الرياضيات", score: d.math_total, max: 30, grade: subjectGrade(d.math_total, 30) },
-          { name: "العلوم", score: d.science, max: 20, grade: subjectGrade(d.science, 20) }
-        ],
-        extras: [
-          { name: "التربية الدينية", score: d.religion, status: scoreStatus(d.religion, 10) },
-          { name: "التربية الفنية", score: d.art, status: scoreStatus(d.art, 5) },
-          { name: "الحاسب الآلي", score: d.computer, status: scoreStatus(d.computer, 5) }
-        ]
-      };
     }
 
-    function fillTableRows(tbodyId, rows, cols){
-      const tbody = document.getElementById(tbodyId);
-      tbody.innerHTML = "";
-
-      if (!rows || !rows.length){
-        const tr = document.createElement("tr");
-        const td = document.createElement("td");
-        td.colSpan = cols;
-        td.textContent = "لا توجد بيانات";
-        tr.appendChild(td);
-        tbody.appendChild(tr);
-        return;
-      }
-
-      rows.forEach(row => {
-        const tr = document.createElement("tr");
-        row.forEach(cell => {
-          const td = document.createElement("td");
-          td.textContent = safeText(cell);
-          tr.appendChild(td);
-        });
-        tbody.appendChild(tr);
-      });
-    }
-
-    function updatePassFailCard(passFailText){
-      const card = document.getElementById("passFailCard");
-      const icon = document.getElementById("passFailIcon");
-      const text = document.getElementById("passFailBox");
-
-      card.classList.remove("stat-pass", "stat-fail");
-
-      if (passFailText === "ناجح"){
-        card.classList.add("stat-pass");
-        icon.textContent = "✔";
-        text.textContent = "ناجح";
-      } else {
-        card.classList.add("stat-fail");
-        icon.textContent = "✖";
-        text.textContent = "راسب";
-      }
-    }
-
-    function renderResult(student){
+    // --- Rendering ---
+    function renderResult(student) {
       currentStudent = student;
 
+      // Text Updates
       document.getElementById("studentName").textContent = safeText(student.name);
       document.getElementById("seatValue").textContent = safeText(student.seatNumber);
       document.getElementById("gradeClassValue").textContent = safeText(student.grade);
@@ -928,202 +885,198 @@
       document.getElementById("maxScore").textContent = safeText(student.maxTotal, 140);
       document.getElementById("percentageValue").textContent = safeText(student.percentage, 0);
       document.getElementById("coreTotal").textContent = safeText(student.coreTotal, 0);
-      document.getElementById("coreMax").textContent = safeText(student.coreMax, 140);
       document.getElementById("finalStatus").textContent = safeText(student.finalStatus);
-      document.getElementById("term1Result").textContent = safeText(student.term1Result, "غير متوفر");
-      document.getElementById("term2Result").textContent = safeText(student.term2Result, "غير متوفر");
+      document.getElementById("term1Result").textContent = safeText(student.term1Result);
+      document.getElementById("term2Result").textContent = safeText(student.term2Result);
 
-      const gradeText = student.finalGrade || getGradeFromPercentage(student.percentage);
-      const passFailText = getPassFail(student);
+      // Status Badge Logic
+      const badge = document.getElementById("finalStatus");
+      if (student.finalStatus.includes("راسب")) {
+        badge.classList.add("fail");
+      } else {
+        badge.classList.remove("fail");
+      }
 
+      // Grade Logic
+      const gradeText = student.finalGrade;
       document.getElementById("gradeValueBox").textContent = gradeText;
       document.getElementById("gradeIcon").textContent = getGradeIcon(gradeText);
-      updatePassFailCard(passFailText);
 
-      fillTableRows(
-        "subjectsBody",
-        (student.subjects || []).map(sub => [sub.name, sub.score, sub.max, sub.grade]),
-        4
-      );
+      // Pass/Fail Card Logic
+      const passFailCard = document.getElementById("passFailCard");
+      const passFailBox = document.getElementById("passFailBox");
+      const passFailIcon = document.getElementById("passFailIcon");
 
-      fillTableRows(
-        "extraBody",
-        (student.extras || []).map(sub => [sub.name, sub.score, sub.status]),
-        3
-      );
+      passFailBox.textContent = student.finalStatus;
+      if (student.finalStatus === "ناجح") {
+        passFailCard.className = "stat-card stat-pass";
+        passFailIcon.textContent = "✔";
+        // Trigger Confetti for high grades
+        if (gradeText === "ممتاز" || gradeText === "جيد جداً") {
+          triggerConfetti();
+        }
+      } else {
+        passFailCard.className = "stat-card stat-fail";
+        passFailIcon.textContent = "✖";
+      }
 
+      // Render Tables
+      const renderTable = (tbodyId, data, columns, isExtra) => {
+        const tbody = document.getElementById(tbodyId);
+        tbody.innerHTML = "";
+        
+        data.forEach(item => {
+          const tr = document.createElement("tr");
+          if (isExtra) {
+            // For extra subjects, assume pass logic or just show score
+            tr.innerHTML = `
+              <td>${item.name}</td>
+              <td><strong>${item.score}</strong></td>
+              <td><span style="color:var(--success)">ناجح</span></td>
+            `;
+          } else {
+            tr.innerHTML = `
+              <td>${item.name}</td>
+              <td style="font-weight:bold; font-size:1.05rem">${item.score}</td>
+              <td>${item.max}</td>
+              <td><span style="background:#f1f5f9; padding:2px 8px; border-radius:4px; font-size:0.85rem;">${item.grade}</span></td>
+            `;
+          }
+          tbody.appendChild(tr);
+        });
+      };
+
+      renderTable("subjectsBody", student.subjects, 4, false);
+      renderTable("extraBody", student.extras, 3, true);
+
+      // UI Transition
+      emptyState.classList.add("hidden");
       resultSection.style.display = "block";
-      emptyState.style.display = "none";
+      
+      // Reset Animations
+      const animatedElements = document.querySelectorAll(".animate-in");
+      animatedElements.forEach(el => {
+        el.style.animation = 'none';
+        el.offsetHeight; /* trigger reflow */
+        el.style.animation = null; 
+      });
+
+      // Scroll to result
+      setTimeout(() => {
+        resultSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
     }
 
-    async function searchResult(){
-      const seatNumber = seatInput.value.trim();
-
-      if (!seatNumber){
-        setStatus("من فضلك أدخل رقم الجلوس أولًا", "#fecaca");
-        resultSection.style.display = "none";
-        emptyState.style.display = "block";
+    // --- Event Handlers ---
+    async function handleSearch() {
+      const seat = seatInput.value.trim();
+      
+      if (!seat) {
+        updateStatus("من فضلك أدخل رقم الجلوس أولاً", "error");
+        searchWrapper.classList.add("shake-element");
+        setTimeout(() => searchWrapper.classList.remove("shake-element"), 500);
+        seatInput.focus();
         return;
       }
 
-      setStatus("جاري البحث عن نتيجتك…", "#bfdbfe");
+      // Loading State
+      btnText.style.display = "none";
+      loader.style.display = "inline-block";
+      searchBtn.disabled = true;
+      updateStatus("جاري الاتصال بقاعدة البيانات...", "normal");
 
-      try {
-        const student = await fetchStudentBySeat(seatNumber);
+      const data = await fetchStudentData(seat);
 
-        if (!student){
-          setStatus("لم يتم العثور على نتيجة بهذا الرقم", "#fecaca");
-          resultSection.style.display = "none";
-          emptyState.style.display = "block";
-          return;
-        }
+      // Reset State
+      loader.style.display = "none";
+      btnText.style.display = "inline";
+      searchBtn.disabled = false;
 
-        renderResult(student);
-        setStatus("تم العثور على النتيجة بنجاح", "#bbf7d0");
-        document.getElementById("resultSection").scrollIntoView({ behavior: "smooth", block: "start" });
-      } catch (error) {
-        setStatus("حدث خطأ أثناء الاتصال بمصدر البيانات", "#fecaca");
+      if (!data) {
+        updateStatus("عذراً، لم يتم العثور على نتيجة لهذا الرقم", "error");
+        emptyState.classList.remove("hidden");
         resultSection.style.display = "none";
-        emptyState.style.display = "block";
+        searchWrapper.classList.add("shake-element");
+        setTimeout(() => searchWrapper.classList.remove("shake-element"), 500);
+      } else {
+        updateStatus("تم جلب البيانات بنجاح", "success");
+        renderResult(data);
       }
     }
 
-    async function downloadImage(){
+    // --- Exports & Share ---
+    async function downloadImage() {
       if (!currentStudent) return;
-
       const element = document.getElementById("printArea");
+      
+      // Temporary styling for clean capture
+      const originalTransform = element.style.transform;
+      element.style.transform = "none";
+      
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
         backgroundColor: "#ffffff",
-        scrollY: 0,
-        windowWidth: document.documentElement.scrollWidth,
-        windowHeight: document.documentElement.scrollHeight
+        logging: false
       });
 
+      element.style.transform = originalTransform;
+
       const link = document.createElement("a");
-      link.download = `natiga-${currentStudent.seatNumber}.png`;
-      link.href = canvas.toDataURL("image/png");
+      link.download = `result-${currentStudent.seatNumber}.png`;
+      link.href = canvas.toDataURL();
       link.click();
     }
 
-    async function downloadPDF(){
+    async function downloadPDF() {
       if (!currentStudent) return;
-
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF("p", "mm", "a4");
+      
+      // Simple Text-based PDF for reliability and Arabic support (HTML2Canvas PDF often fails with Arabic text)
+      // Note: For perfect Arabic in PDF, complex libraries are needed. 
+      // We will fallback to Image-based PDF generation as per original logic which is safer for layout preservation.
+      
       const element = document.getElementById("printArea");
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
-        backgroundColor: "#ffffff",
-        scrollY: 0,
-        windowWidth: document.documentElement.scrollWidth,
-        windowHeight: document.documentElement.scrollHeight
+        backgroundColor: "#ffffff"
       });
-
-      const imgData = canvas.toDataURL("image/png");
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF("p", "mm", "a4");
-
-      const pageWidth = 210;
-      const pageHeight = 297;
-      const margin = 10;
-      const usableWidth = pageWidth - margin * 2;
-      const imgHeight = (canvas.height * usableWidth) / canvas.width;
-      const printableHeight = pageHeight - margin * 2;
-
-      if (imgHeight <= printableHeight){
-        pdf.addImage(imgData, "PNG", margin, margin, usableWidth, imgHeight);
-      } else {
-        let heightLeft = imgHeight;
-        let position = margin;
-
-        pdf.addImage(imgData, "PNG", margin, position, usableWidth, imgHeight);
-        heightLeft -= printableHeight;
-
-        while (heightLeft > 0){
-          position = heightLeft - imgHeight + margin;
-          pdf.addPage();
-          pdf.addImage(imgData, "PNG", margin, position, usableWidth, imgHeight);
-          heightLeft -= printableHeight;
-        }
-      }
-
-      pdf.save(`natiga-${currentStudent.seatNumber}.pdf`);
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdfWidth = doc.internal.pageSize.getWidth();
+      const pdfHeight = doc.internal.pageSize.getHeight();
+      const imgProps = doc.getImageProperties(imgData);
+      const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      
+      doc.addImage(imgData, 'PNG', 0, 0, pdfWidth, imgHeight);
+      doc.save(`result-${currentStudent.seatNumber}.pdf`);
     }
 
-    function printResult(){
+    function shareWhatsApp() {
       if (!currentStudent) return;
-      window.print();
+      const text = `🎓 نتيجة الطالب:\n👤 الاسم: ${currentStudent.name}\n📊 المجموع: ${currentStudent.percentage}%\n🏅 التقدير: ${currentStudent.finalGrade}\n🔗 ${SITE_URL}`;
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
     }
 
-    function shareWhatsApp(){
-      if (!currentStudent) return;
-
-      const message = [
-        "🎓 نتيجة الطالب",
-        `الاسم: ${safeText(currentStudent.name, "-")}`,
-        `رقم الجلوس: ${safeText(currentStudent.seatNumber, "-")}`,
-        `الصف: ${safeText(currentStudent.grade, "-")}`,
-        `المدرسة: ${safeText(currentStudent.school, "-")}`,
-        `الإدارة: ${safeText(currentStudent.department, "-")}`,
-        `التقدير العام: ${safeText(document.getElementById("gradeValueBox").textContent, "—")}`,
-        `الحالة: ${safeText(document.getElementById("passFailBox").textContent, "—")}`,
-        `الفصل الدراسي الأول: ${safeText(currentStudent.term1Result, "غير متوفر")}`,
-        `الفصل الدراسي الثاني: ${safeText(currentStudent.term2Result, "غير متوفر")}`,
-        `المجموع: ${safeText(currentStudent.total, "-")} / ${safeText(currentStudent.maxTotal, "-")}`,
-        `النسبة: ${safeText(currentStudent.percentage, "-")}%`,
-        "",
-        "🔗 رابط الموقع:",
-        SITE_URL,
-        "",
-        `برمجة ${DEVELOPER_NAME}`
-      ].join("\\n");
-
-      const waUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-      window.open(waUrl, "_blank");
-    }
-
-    async function nativeShare(){
-      const shareText = `🎓 نتيجة الطالب\\n🔗 ${SITE_URL}\\nبرمجة ${DEVELOPER_NAME}`;
-      if (navigator.share){
-        try {
-          await navigator.share({
-            title: "نتيجة الطالب",
-            text: shareText,
-            url: SITE_URL
-          });
-        } catch (e) {}
-      } else {
-        window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank");
-      }
-    }
-
-    searchBtn.addEventListener("click", searchResult);
+    // --- Init ---
+    searchBtn.addEventListener("click", handleSearch);
     seatInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") searchResult();
+      if (e.key === "Enter") handleSearch();
     });
 
     document.getElementById("downloadImageBtn").addEventListener("click", downloadImage);
     document.getElementById("downloadPdfBtn").addEventListener("click", downloadPDF);
-    document.getElementById("printBtn").addEventListener("click", printResult);
     document.getElementById("whatsappBtn").addEventListener("click", shareWhatsApp);
-    document.getElementById("nativeShareBtn").addEventListener("click", (e) => {
-      e.preventDefault();
-      nativeShare();
-    });
+    document.getElementById("printBtn").addEventListener("click", () => window.print());
 
-    document.getElementById("scrollToSearch").addEventListener("click", (e) => {
-      e.preventDefault();
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      seatInput.focus();
-    });
-
+    // Check URL for seat number
     const urlParams = new URLSearchParams(window.location.search);
     const seatFromUrl = urlParams.get("seat");
-
-    if (seatFromUrl){
+    if (seatFromUrl) {
       seatInput.value = seatFromUrl;
-      searchResult();
+      handleSearch();
     }
   </script>
 </body>
