@@ -1,20 +1,3 @@
-// =============================================================================
-//  نتيجة الطالب — Cloudflare Worker
-//  يبحث عن نتيجة الشهادة الإعدادية (الدقهلية) من 3 مصادر بالترتيب التالي:
-//    1) nezakr  → الأدق والأسرع، يرجع جدول المواد كاملاً
-//    2) natiga4dk → fallback، لكن بنظام درجات مختلف (مضاعف) — استخدمه فقط عند فشل nezakr
-//    3) official (natiga.edudk.net) → API الرسمي، حالياً يرجع 500 + body فارغ
-//
-//  التشخيص النهائي (تحقق منه على أرض الواقع):
-//    - api_result.php?seat=... → HTTP 500 size=0  (الـ API الرسمي لا يعمل،
-//      والموقع نفسه يعرض "بيانات تجريبية" — لا تعتمد عليه في 2026).
-//    - nezakr يرجع صفحة HTML كاملة فيها جدول المواد (10 مواد) + meta description
-//      فيها الاسم/المدرسة/الإدارة/المجموع.
-//    - natiga4dk يحتاج رابط GET بصيغة /dakahlia/?type=num&k=<seat> ويرجع جدول
-//      درجات، لكن القيم بنظام مضاعف (مثلاً عربي 73 بدلاً من 38) — استخدمه فقط
-//      إذا فشل nezakr، واعتبر قيمه "تقريبية".
-// =============================================================================
-
 export default {
   async fetch(request) {
     if (request.method === "OPTIONS") {
@@ -35,14 +18,14 @@ export default {
         return jsonResponse({ ok: false, msg: "لم يتم العثور على نتيجة لرقم الجلوس المدخل" });
       }
 
-      const data = { ...result.mapped };
+      const data = finalizeMappedResult(result.mapped);
+
       if (debug) {
-        // Diagnostic-only fields. index.html never requests debug=1,
-        // so these never reach the normal app UI.
         data._source = result.source;
         data._endpoint = result.endpoint;
         data._raw = stripForDebug(result.raw);
       }
+
       return jsonResponse({ ok: true, data });
     } catch (e) {
       return jsonResponse({ ok: false, msg: "حدث خطأ أثناء جلب النتيجة، حاول مرة أخرى" });
@@ -67,9 +50,6 @@ function jsonResponse(obj) {
   });
 }
 
-// Strips <script>/<style> blocks and collapses whitespace before
-// truncating, so the debug snippet is dense with actual visible
-// content instead of being eaten up by boilerplate CSS/JS.
 function stripForDebug(raw, limit = 6000) {
   if (raw == null) return null;
   let text = typeof raw === "string" ? raw : JSON.stringify(raw);
@@ -81,10 +61,7 @@ function stripForDebug(raw, limit = 6000) {
   return text.slice(0, limit);
 }
 
-// Tries each source in order; first one that returns a usable result wins.
-// Each fetch* function returns { mapped, source, endpoint, raw } or null.
 async function searchAllSites(seat) {
-  // nezakr أولاً لأنه الأدق، ثم natiga4dk كـ fallback، ثم official.
   const sources = [fetchNezakr, fetchNatiga4dk, fetchOfficial];
   for (const fn of sources) {
     try {
@@ -97,9 +74,6 @@ async function searchAllSites(seat) {
   return null;
 }
 
-// ───────────────────────────────────────────────────────────
-// Helpers
-// ───────────────────────────────────────────────────────────
 function pick(obj, keys) {
   for (const k of keys) {
     if (obj[k] !== undefined && obj[k] !== null && obj[k] !== "") return obj[k];
@@ -113,7 +87,6 @@ function numOr(v, fallback) {
   return Number.isFinite(n) ? n : fallback;
 }
 
-// يبني headers متصفح حقيقية لتجنب حجب bot-detection.
 function browserHeaders(extra = {}) {
   return {
     Accept:
@@ -126,7 +99,6 @@ function browserHeaders(extra = {}) {
   };
 }
 
-// يبني كائن درجات فارغ بالـ schema المتوقع من index.html.
 function emptyMapped(seat) {
   return {
     student_name: "",
@@ -137,6 +109,9 @@ function emptyMapped(seat) {
     total: 0,
     percentage: null,
     grade: null,
+    result_status: null,
+    term_name: null,
+    is_old_result: false,
     ar: null,
     en: null,
     studies: null,
@@ -152,17 +127,82 @@ function emptyMapped(seat) {
   };
 }
 
-// ───────────────────────────────────────────────────────────
-// SOURCE 1 (preferred): nezakr — صفحة HTML فيها جدول موثوق
-//   رابط: https://natiga.nezakr.net/dakahlia/num/<seat>/
-//   الحقول المستخرجة:
-//     - student_name  من <title>  "نتيجة الطالب <NAME> بالشهادة ..."
-//     - school_name   من meta description "المقيد بمدرسة <SCHOOL>"
-//     - admin_name    من meta description "بإدارة <ADMIN>"
-//     - total         من meta description "مجموع <X> درجة من 140.00 درجة"
-//     - ar/en/algebra/geometry/math_total/science/studies/religion/art/computer
-//                     من أول <table> بالصفحة (عمود "المجموع")
-// ───────────────────────────────────────────────────────────
+function normalizeArabicText(s) {
+  if (!s) return "";
+  return String(s)
+    .replace(/أ|إ|آ/g, "ا")
+    .replace(/ة/g, "ه")
+    .replace(/ى/g, "ي")
+    .replace(/ؤ/g, "و")
+    .replace(/ئ/g, "ي")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function normalizeGradeText(grade) {
+  if (!grade) return null;
+  const g = normalizeArabicText(grade);
+
+  if (g.includes("ممتاز")) return "ممتاز";
+  if (g.includes("جيد جدا")) return "جيد جدًا";
+  if (g === "جيد" || g.includes(" جيد ")) return "جيد";
+  if (g.includes("مقبول")) return "مقبول";
+  if (g.includes("ضعيف")) return "ضعيف";
+  if (g.includes("راسب")) return "راسب";
+
+  return grade.trim();
+}
+
+function parsePercentage(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const m = String(value).match(/[\d.]+/);
+  return m ? parseFloat(m[0]) : null;
+}
+
+function deriveGradeFromPercentage(percentage) {
+  const p = Number(percentage);
+  if (!Number.isFinite(p)) return null;
+  if (p >= 85) return "ممتاز";
+  if (p >= 75) return "جيد جدًا";
+  if (p >= 65) return "جيد";
+  if (p >= 50) return "مقبول";
+  return "ضعيف";
+}
+
+function deriveStatus({ grade, percentage, total, maxTotal = 140 }) {
+  const g = normalizeArabicText(grade || "");
+
+  if (g.includes("راسب")) return "راسب";
+  if (g.includes("ممتاز") || g.includes("جيد") || g.includes("مقبول")) return "ناجح";
+
+  const p = parsePercentage(percentage);
+  if (p !== null) return p >= 50 ? "ناجح" : "راسب";
+
+  const t = Number(total);
+  if (Number.isFinite(t)) return t >= maxTotal / 2 ? "ناجح" : "راسب";
+
+  return null;
+}
+
+function finalizeMappedResult(mapped) {
+  const out = { ...mapped };
+
+  const p = parsePercentage(out.percentage);
+  if (p !== null) {
+    out.percentage = `${p}%`;
+  }
+
+  out.grade = normalizeGradeText(out.grade) || deriveGradeFromPercentage(p);
+  out.result_status = out.result_status || deriveStatus({
+    grade: out.grade,
+    percentage: out.percentage,
+    total: out.total,
+    maxTotal: 140,
+  });
+
+  return out;
+}
+
 async function fetchNezakr(seat) {
   const pageUrl = `https://natiga.nezakr.net/dakahlia/num/${seat}/`;
   const r = await fetch(pageUrl, {
@@ -170,8 +210,9 @@ async function fetchNezakr(seat) {
     cf: { cacheTtl: 60, cacheEverything: true },
   });
   if (!r.ok) return null;
+
   const html = await r.text();
-  // صفحات "غير موجود" عند nezakr بترجع 200 + نص "لم يتم العثور"
+
   if (
     html.includes("لم يتم العثور") ||
     html.includes("غير موجود") ||
@@ -180,29 +221,20 @@ async function fetchNezakr(seat) {
     return null;
   }
 
-  // 1) الاسم من <title>
-  //    مثال: "نتيجة الطالب منى السيد عبد الهادى ابراهيم ابو الحسن بالشهادة الإعدادية ..."
-  const titleMatch = html.match(
-    /<title>\s*نتيجة الطالب\s+(.+?)\s+بالشهادة/
-  );
+  const titleMatch = html.match(/<title>\s*نتيجة الطالب\s+(.+?)\s+بالشهادة/);
   let name = titleMatch ? titleMatch[1].trim() : "";
-  // fallback: من meta description
+
   if (!name) {
-    const m = html.match(
-      /نتيجة الطالب\s+(.+?)\s+بالشهادة/
-    );
+    const m = html.match(/نتيجة الطالب\s+(.+?)\s+بالشهادة/);
     if (m) name = m[1].trim();
   }
+
   if (!name) return null;
   if (name.includes("نذاكر") || name.includes("موقع")) return null;
 
-  // 2) المدرسة + الإدارة + المجموع من meta description
-  //    مثال: "...والمقيد بمدرسة دكرنس ع الحديثة بنات، والمقيد بإدارة دكرنس
-  //           وقد حصل الطالب على مجموع 129.50 درجة من 140.00 درجة..."
   const metaMatch =
-    html.match(
-      /<meta\s+name="description"\s+content="([^"]+)"/
-    ) || html.match(/<meta\s+content="([^"]+)"\s+name="description"/);
+    html.match(/<meta\s+name="description"\s+content="([^"]+)"/) ||
+    html.match(/<meta\s+content="([^"]+)"\s+name="description"/);
   const meta = metaMatch ? metaMatch[1] : "";
 
   const schoolMatch = meta.match(/المقيد بمدرسة\s+([^,،]+)/);
@@ -210,24 +242,29 @@ async function fetchNezakr(seat) {
   const totalMatch = meta.match(/مجموع\s+([\d.]+)\s*درجة\s*من\s*([\d.]+)\s*درجة/);
   const total = totalMatch ? parseFloat(totalMatch[1]) : null;
 
-  // النسبة المئوية والتقدير إن وُجدا
-  const pctMatch = html.match(/النسبة المئوية[^()]{0,40}\(\s*([\d.]+)\s*%\s*\)/);
-  const percentage = pctMatch ? pctMatch[1] + "%" : null;
-  const gradeMatch = html.match(/ممتاز|جيد جداً|جيد|مقبول|راسب|ضعيف/);
-  const grade = gradeMatch ? gradeMatch[0] : null;
+  const pctMatch =
+    html.match(/####\s*([\d.]+)%\s*[\s\S]{0,120}?النسبة المئوية/) ||
+    html.match(/بلغت النسبة المئوية[^()]*\(([\d.]+)%\)/) ||
+    html.match(/النسبة المئوية[^()]{0,40}\(\s*([\d.]+)\s*%\s*\)/);
+  const percentage = pctMatch ? `${pctMatch[1]}%` : null;
 
-  // 3) جدول المواد
-  //    nezakr فيه 3 جداول. الأول هو جدول الدرجات بأعمدة:
-  //    "المادة | المجموع | النهاية العظمى | التقدير"
-  //    نأخذ العمود الثاني (المجموع) ونطابقه مع أسماء المواد المعروفة.
+  const gradeBlockMatch =
+    html.match(/####\s*(ممتاز|جيد جداً|جيد جدًا|جيد|مقبول|راسب|ضعيف)\s*[\s\S]{0,120}?التقدير العام/) ||
+    html.match(/التقدير العام[:\s]+(?:<\/[^>]+>\s*)*(ممتاز|جيد جداً|جيد جدًا|جيد|مقبول|راسب|ضعيف)/) ||
+    html.match(/تقدير\s+(ممتاز|جيد جداً|جيد جدًا|جيد|مقبول|راسب|ضعيف)/);
+  const grade = gradeBlockMatch ? normalizeGradeText(gradeBlockMatch[1]) : null;
+
+  const termMatch = html.match(/الفصل الدراسي:\s*[\s\S]{0,80}?(الفصل الدراسي الأول|الفصل الدراسي الثاني)/);
+  const termName = termMatch ? termMatch[1].trim() : null;
+
+  const oldResultFlag = /هذه النتيجة قديمة تخص الفصل الدراسي الأول 2026/.test(html);
+
   const subjects = parseNezakrSubjectsTable(html);
 
-  // التحقق: لازم يكون عندنا على الأقل total أو جدول مواد
   if (total === null && Object.keys(subjects).length === 0) {
     return null;
   }
 
-  // حساب المجموع من المواد الأساسية لو ما قرأناش من meta
   const ar = numOr(subjects["ar"], null);
   const en = numOr(subjects["en"], null);
   const studies = numOr(subjects["studies"], null);
@@ -242,12 +279,19 @@ async function fetchNezakr(seat) {
   const art = numOr(subjects["art"], null);
   const computer = numOr(subjects["computer"], null);
 
-  // total المحسوب من المواد الأساسية (للتحقق)
   const computedTotal = [ar, en, studies, mathTotal, science]
     .filter((v) => v !== null)
     .reduce((a, b) => a + b, 0);
+
   const finalTotal =
     total !== null ? total : computedTotal > 0 ? computedTotal : 0;
+
+  const result_status = deriveStatus({
+    grade,
+    percentage,
+    total: finalTotal,
+    maxTotal: 140,
+  });
 
   return {
     mapped: {
@@ -259,6 +303,9 @@ async function fetchNezakr(seat) {
       total: finalTotal,
       percentage,
       grade,
+      result_status,
+      term_name: termName,
+      is_old_result: oldResultFlag,
       ar,
       en,
       studies,
@@ -269,8 +316,8 @@ async function fetchNezakr(seat) {
       religion,
       art,
       computer,
-      level1: null,
-      level2: null,
+      level1: termName === "الفصل الدراسي الأول" ? finalTotal : null,
+      level2: termName === "الفصل الدراسي الثاني" ? finalTotal : null,
     },
     source: "nezakr",
     endpoint: pageUrl,
@@ -278,18 +325,6 @@ async function fetchNezakr(seat) {
   };
 }
 
-// يقرأ أول <table> في صفحة nezakr ويرجع خريطة أسماء المواد إلى درجاتها.
-//   المادة بالعربي   →  المفتاح في schema natega-main
-//   اللغة العربية     ar
-//   اللغة الانجليزية  en
-//   الجبر              algebra
-//   الهندسة            geometry
-//   مجموع الرياضيات  math_total
-//   العلوم             science
-//   الدراسات الاجتماعية  studies
-//   التربية الدينية    religion
-//   التربية الفنية     art
-//   الحاسب الآلي       computer
 function parseNezakrSubjectsTable(html) {
   const out = {};
   const tables = html.match(/<table[\s\S]*?<\/table>/gi) || [];
@@ -297,38 +332,41 @@ function parseNezakrSubjectsTable(html) {
 
   const firstTable = tables[0];
   const rows = firstTable.match(/<tr[^>]*>[\s\S]*?<\/tr>/gi) || [];
+
   for (const row of rows) {
     const cells = row.match(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi) || [];
     if (cells.length < 2) continue;
+
     const cellText = (c) =>
       c
         .replace(/<[^>]+>/g, "")
         .replace(/&nbsp;/gi, " ")
         .replace(/\s+/g, " ")
         .trim();
+
     const subjectName = cellText(cells[0]);
-    const scoreStr = cellText(cells[1]); // "المجموع" column
+    const scoreStr = cellText(cells[1]);
     const key = mapSubjectNameToKey(subjectName);
     if (!key) continue;
+
     const score = parseFloat(scoreStr);
     if (Number.isFinite(score)) {
       out[key] = score;
     }
   }
+
   return out;
 }
 
 function mapSubjectNameToKey(name) {
   if (!name) return null;
-  const n = name.toLowerCase();
   if (name.includes("اللغة العربية") || name.includes("اللغه العربية")) return "ar";
   if (
     name.includes("اللغة الانجليزية") ||
     name.includes("اللغه الانجليزية") ||
     name.includes("اللغة الإنجليزية") ||
     name.includes("اللغه الإنجليزية")
-  )
-    return "en";
+  ) return "en";
   if (name.includes("الجبر") || name.includes("الاحصاء والجبر") || name.includes("الإحصاء والجبر")) return "algebra";
   if (name.includes("الهندسة")) return "geometry";
   if (name.includes("مجموع الرياضيات")) return "math_total";
@@ -340,13 +378,6 @@ function mapSubjectNameToKey(name) {
   return null;
 }
 
-// ───────────────────────────────────────────────────────────
-// SOURCE 2 (fallback): natiga4dk — بنظام درجات مختلف (مضاعف)
-//   رابط: https://www.natiga4dk.com/dakahlia/?type=num&k=<seat>
-//   ملاحظة مهمة: natiga4dk يعرض القيم بنظام درجات مضاعف مقارنة بـ nezakr
-//   (مثلاً عربي 73 بدلاً من 38.5). استخدمه فقط عند فشل nezakr، واعتبر
-//   قيمه "تقريبية".
-// ───────────────────────────────────────────────────────────
 async function fetchNatiga4dk(seat) {
   const pageUrl = `https://www.natiga4dk.com/dakahlia/?type=num&k=${seat}`;
   const r = await fetch(pageUrl, {
@@ -354,41 +385,35 @@ async function fetchNatiga4dk(seat) {
     cf: { cacheTtl: 60, cacheEverything: true },
   });
   if (!r.ok) return null;
+
   const html = await r.text();
+
   if (
+    html.includes("رقم الجلوس الذي أدخلته خاطئ") ||
+    html.includes("النتيجة لم تظهر بعد") ||
     html.includes("غير موجودة") ||
-    html.includes("404") ||
-    html.length < 5000
+    html.includes("404")
   ) {
     return null;
   }
 
-  // 1) الاسم من <title>
-  //    مثال: "نتيجة الطالب امجد عزيز محمد حافظ رفاعى بالشهادة الإعدادية ..."
-  const titleMatch = html.match(
-    /<title>\s*نتيجة الطالب\s+(.+?)\s+بالشهادة/
-  );
+  const titleMatch = html.match(/<title>\s*نتيجة الطالب\s+(.+?)\s+بالشهادة/);
   const name = titleMatch ? titleMatch[1].trim() : "";
   if (!name) return null;
 
-  // 2) جدول "بيانات الطالب" فيه: المجموع، المجموع الكلي، النسبة، الحالة
-  //    نأخذ "المجموع الكلي" (القيمة من 140) لأنه هو القيمة الموحدة للشهادة.
-  //    إذا ما وجدناش، نحاول نحسبه من المواد الأساسية.
   const totalMatch =
     html.match(/المجموع الكلي[^<>]*?<\/td>\s*<td[^>]*>([^<]+)/i) ||
     html.match(/المجموع الكلي[\s:]*([\d.]+)/);
   const total = totalMatch ? parseFloat(totalMatch[1]) : null;
 
   const schoolMatch = html.match(/المدرسة[^<>]*?<\/td>\s*<td[^>]*>([^<]+)/i);
-  const adminMatch = html.match(
-    /الإدارة التعليمية[^<>]*?<\/td>\s*<td[^>]*>([^<]+)/i
-  );
+  const adminMatch = html.match(/الإدارة التعليمية[^<>]*?<\/td>\s*<td[^>]*>([^<]+)/i);
   const statusMatch = html.match(/حالة الطالب[^<>]*?<\/td>\s*<td[^>]*>([^<]+)/i);
-  const grade = statusMatch ? statusMatch[1].trim() : null;
+  const percentageMatch = html.match(/النسبة المئوية[^<>]*?<\/td>\s*<td[^>]*>([^<]+)/i);
 
-  // 3) جدول "درجات المواد" فيه عمودين: المادة | الدرجة
-  //    natiga4dk بيظهر القيم بنظام مضاعف، فنحاول نصفها على 2 للحصول على
-  //    القيم الحقيقية المتوافقة مع نظام الشهادة.
+  const grade = statusMatch ? normalizeGradeText(statusMatch[1].trim()) : null;
+  const percentage = percentageMatch ? `${parsePercentage(percentageMatch[1])}%` : null;
+
   const subjects = parseNatiga4dkSubjectsTable(html);
 
   const rawAr = numOr(subjects["ar"], null);
@@ -402,9 +427,7 @@ async function fetchNatiga4dk(seat) {
   const rawArt = numOr(subjects["art"], null);
   const rawComputer = numOr(subjects["computer"], null);
 
-  // natiga4dk بنظام مضاعف، فنقسم على 2 لتقريب القيم لنظام الشهادة الحقيقي
-  // (140 درجة). القيم الناتجة تقريبية لكنها قابلة للعرض.
-  const halve = (v) => (v !== null ? Math.round(v * 50) / 100 : null);
+  const halve = (v) => (v !== null ? Math.round((v / 2) * 100) / 100 : null);
   const ar = halve(rawAr);
   const en = halve(rawEn);
   const studies = halve(rawStudies);
@@ -421,10 +444,10 @@ async function fetchNatiga4dk(seat) {
   const art = halve(rawArt);
   const computer = halve(rawComputer);
 
-  // المجموع المحسوب
   const computedTotal = [ar, en, studies, mathTotal, science]
     .filter((v) => v !== null)
     .reduce((a, b) => a + b, 0);
+
   const finalTotal =
     total !== null && total > 0
       ? total
@@ -432,7 +455,12 @@ async function fetchNatiga4dk(seat) {
       ? Math.round(computedTotal * 100) / 100
       : 0;
 
-  if (finalTotal === 0 && !name) return null;
+  const result_status = deriveStatus({
+    grade,
+    percentage,
+    total: finalTotal,
+    maxTotal: 140,
+  });
 
   return {
     mapped: {
@@ -442,8 +470,11 @@ async function fetchNatiga4dk(seat) {
       school_name: cleanNatiga4dkText(schoolMatch ? schoolMatch[1] : ""),
       admin_name: cleanNatiga4dkText(adminMatch ? adminMatch[1] : ""),
       total: finalTotal,
-      percentage: null,
+      percentage,
       grade,
+      result_status,
+      term_name: null,
+      is_old_result: false,
       ar,
       en,
       studies,
@@ -463,13 +494,11 @@ async function fetchNatiga4dk(seat) {
   };
 }
 
-// يقرأ جدول "درجات المواد" في natiga4dk
 function parseNatiga4dkSubjectsTable(html) {
   const out = {};
   const tables = html.match(/<table[\s\S]*?<\/table>/gi) || [];
   if (tables.length < 2) return out;
 
-  // نبحث عن الجدول الذي يحتوي على "درجات المواد"
   let target = null;
   for (const t of tables) {
     if (t.includes("درجات المواد") || t.includes("اللغة العربية")) {
@@ -483,19 +512,21 @@ function parseNatiga4dkSubjectsTable(html) {
   for (const row of rows) {
     const cells = row.match(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi) || [];
     if (cells.length < 2) continue;
+
     const cellText = (c) =>
       c
         .replace(/<[^>]+>/g, "")
         .replace(/&nbsp;/gi, " ")
         .replace(/\s+/g, " ")
         .trim();
+
     const subjectName = cellText(cells[0]);
     const scoreStr = cellText(cells[1]);
-    // نتخطى صفوف العناوين ("أولاً مواد تُضاف للمجموع"، إلخ)
     if (!subjectName || !/[\d.]/.test(scoreStr)) continue;
 
     const key = mapSubjectNameToKey(subjectName);
     if (!key) continue;
+
     const score = parseFloat(scoreStr);
     if (Number.isFinite(score)) {
       out[key] = score;
@@ -506,18 +537,9 @@ function parseNatiga4dkSubjectsTable(html) {
 
 function cleanNatiga4dkText(s) {
   if (!s) return "";
-  return s
-    .replace(/عرض[^<]*$/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
+  return s.replace(/عرض[^<]*$/g, "").replace(/\s+/g, " ").trim();
 }
 
-// ───────────────────────────────────────────────────────────
-// SOURCE 3 (last-resort): the official Dakahlia directorate site.
-//   حالياً api_result.php بيرجع HTTP 500 + body فارغ — الموقع نفسه
-//   بيقول "يتم عرض بيانات تجريبية للاختبار فقط". خليه آخر fallback
-//   لأنه لو رجع لشغل، يكون هو المصدر الأكثر موثوقية.
-// ───────────────────────────────────────────────────────────
 async function fetchOfficial(seat) {
   const candidates = [
     `https://natiga.edudk.net/P20262026/public/api_result.php?seat=${seat}`,
@@ -533,19 +555,22 @@ async function fetchOfficial(seat) {
         }),
         cf: { cacheTtl: 60, cacheEverything: true },
       });
-      // 500 + body فارغ = الـ API مش شغال — نتخطى بسرعة
+
       if (!r.ok) continue;
+
       const text = await r.text();
       if (!text || !text.trim()) continue;
+
       let raw;
       try {
         raw = JSON.parse(text);
       } catch {
         continue;
       }
+
       const mapped = mapOfficial(raw);
       if (mapped) {
-        return { mapped, source: "official", endpoint: apiUrl, raw: text };
+        return { mapped: finalizeMappedResult(mapped), source: "official", endpoint: apiUrl, raw: text };
       }
     } catch (e) {
       continue;
@@ -556,7 +581,7 @@ async function fetchOfficial(seat) {
 
 function mapOfficial(raw) {
   if (!raw) return null;
-  const d = raw.data || raw.result || raw; // unwrap common envelope shapes
+  const d = raw.data || raw.result || raw;
   const name = pick(d, ["student_name", "name", "ar_name"]);
   if (!name) return null;
 
@@ -566,10 +591,15 @@ function mapOfficial(raw) {
   return {
     student_name: name,
     seat_no: pick(d, ["seat_no", "seat", "seat_number"]) ?? "",
-    grade_name: pick(d, ["grade_name", "grade", "stage"]) ?? "الثالث الإعدادي",
+    grade_name: pick(d, ["grade_name", "grade_name_ar", "stage"]) ?? "الثالث الإعدادي",
     school_name: pick(d, ["school_name", "school", "ar_school"]) ?? "",
     admin_name: pick(d, ["admin_name", "admin", "ar_admin"]) ?? "",
     total: numOr(pick(d, ["total", "sum", "degree"]), 0),
+    percentage: pick(d, ["percentage", "percent"]) ?? null,
+    grade: normalizeGradeText(pick(d, ["grade", "appreciation"])) ?? null,
+    result_status: pick(d, ["result_status", "status", "student_status"]) ?? null,
+    term_name: pick(d, ["term_name", "term"]) ?? null,
+    is_old_result: false,
     ar: numOr(pick(d, ["ar", "arabic"]), 0),
     en: numOr(pick(d, ["en", "english"]), 0),
     studies: numOr(pick(d, ["studies", "social_studies"]), 0),
