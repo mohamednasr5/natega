@@ -565,15 +565,77 @@
     }
 
     @media print {
-      body { background: #fff; color: #000; padding: 0; }
-      .shape, .search-card, .action-bar, .empty-state, header { display: none !important; }
-      .result-wrap { display: block !important; }
-      .container { max-width: 100%; margin: 0; }
-      .result-card { box-shadow: none; border: none; border-radius: 0; }
-      .result-head, .result-body { padding: 0; }
-      .animate-in { opacity: 1 !important; animation: none !important; }
-      .confetti { display: none; }
-    }
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            body {
+                background: #fff !important;
+                color: #000 !important;
+                padding: 0;
+            }
+            .shape, .search-card, .action-bar, .empty-state, header {
+                display: none !important;
+            }
+            .result-wrap {
+                display: block !important;
+            }
+            .container {
+                max-width: 100%;
+                margin: 0;
+            }
+            .result-card,
+            .result-head,
+            .result-body,
+            .info-box,
+            .stat-card,
+            .table-container,
+            table,
+            th,
+            td,
+            .footer-note,
+            .badge {
+                background: #fff !important;
+                background-image: none !important;
+                color: #000 !important;
+                box-shadow: none !important;
+                text-shadow: none !important;
+                border-color: #000 !important;
+            }
+            .result-card {
+                box-shadow: none;
+                border: 1px solid #000 !important;
+                border-radius: 0;
+            }
+            .result-head, .result-body {
+                padding: 0;
+            }
+            .student-name,
+            .info-label,
+            .info-value,
+            .stat-icon,
+            .stat-value,
+            .stat-label,
+            .section-title,
+            p,
+            h2,
+            h3,
+            strong,
+            span,
+            a {
+                color: #000 !important;
+            }
+            .section-title {
+                border-right-color: #000 !important;
+            }
+            .animate-in {
+                opacity: 1 !important;
+                animation: none !important;
+            }
+            .confetti {
+                display: none;
+            }
+        }
   </style>
 </head>
 <body>
@@ -732,9 +794,22 @@
           <div class="footer-note animate-in delay-4">
             <p>تم استخراج هذه النتيجة آلياً من قاعدة البيانات الرسمية</p>
             <p style="margin-top: 5px;">
-              برمجة وتطوير: <strong>المهندس محمد حماد</strong> ❤️
+              برمجة وتطوير: <strong>المهندس محمد نصر</strong> ❤️
             </p>
-          </div>
+                                  <p style="margin-top: 8px; display: flex; justify-content: center; align-items: center; gap: 14px; flex-wrap: wrap;">
+                            <a href="https://www.facebook.com/en.mohamed.nasr" target="_blank" aria-label="Facebook" style="text-decoration: none; color: inherit; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.099 4.388 23.094 10.125 24v-8.438H7.078v-3.489h3.047V9.41c0-3.017 1.792-4.686 4.533-4.686 1.312 0 2.686.235 2.686.235v2.963h-1.514c-1.491 0-1.956.931-1.956 1.887v2.264h3.328l-.532 3.489h-2.796V24C19.612 23.094 24 18.099 24 12.073z"/>
+                                </svg>
+                            </a>
+                            <a href="https://wa.me/201279934735" target="_blank" aria-label="WhatsApp" style="text-decoration: none; color: inherit; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+                                    <path d="M19.11 17.205c-.372 0-1.088 1.39-1.518 1.49-.43.099-.651.05-1.087-.099-.436-.148-1.843-.679-3.508-2.166-1.295-1.155-2.17-2.582-2.422-3.018-.252-.436-.027-.671.189-.886.194-.193.43-.505.645-.757.215-.252.287-.43.43-.718.144-.289.072-.54-.036-.757-.109-.215-.972-2.35-1.331-3.22-.35-.842-.705-.727-.972-.74-.252-.012-.54-.015-.83-.015-.287 0-.757.108-1.155.54-.399.43-1.518 1.483-1.518 3.616 0 2.132 1.554 4.19 1.77 4.476.215.287 3.06 4.674 7.417 6.55 1.036.447 1.845.714 2.475.914 1.04.331 1.985.284 2.733.172.834-.124 2.574-1.05 2.94-2.066.365-1.016.365-1.887.258-2.066-.108-.18-.395-.287-.829-.502z"/>
+                                    <path d="M16.003 3.2c-7.065 0-12.8 5.735-12.8 12.8 0 2.258.589 4.462 1.708 6.405L3.2 28.8l6.56-1.682a12.747 12.747 0 0 0 6.243 1.622h.005c7.063 0 12.792-5.735 12.792-12.8 0-3.424-1.333-6.643-3.757-9.066A12.713 12.713 0 0 0 16.003 3.2zm0 23.377h-.004a10.6 10.6 0 0 1-5.4-1.478l-.387-.23-3.894.998 1.04-3.797-.252-.389a10.594 10.594 0 0 1-1.63-5.681c0-5.843 4.748-10.591 10.592-10.591 2.83 0 5.49 1.102 7.49 3.102a10.53 10.53 0 0 1 3.102 7.49c-.003 5.844-4.752 10.576-10.657 10.576z"/>
+                                </svg>
+                            </a>
+                        </p>
+                    </div>
         </div>
       </div>
 
@@ -743,7 +818,7 @@
         <button class="btn btn-secondary" id="downloadImageBtn">🖼️ صورة</button>
         <button class="btn btn-secondary" id="downloadPdfBtn">📄 PDF</button>
         <button class="btn btn-print" id="printBtn">🖨️ طباعة</button>
-        <button class="btn btn-whatsapp" id="whatsappBtn">💬 واتساب</button>
+        <button class="btn btn-whatsapp" id="whatsappBtn">واتساب واتساب</button>
       </div>
     </section>
   </div>
