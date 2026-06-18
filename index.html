@@ -10,13 +10,13 @@
   <meta property="og:description" content="استعلم عن نتيجة الطالب بسهولة ومشاركة النتيجة مع الأهل والأصدقاء." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://mohamednasr5.github.io/natega/" />
-  <meta property="og:image" content="https://mohamednasr5.github.io/natega/preview.jpg" />
+  <meta property="og:image" content="https://mohamednasr5.github.io/natega/preview.png" />
   <meta property="og:locale" content="ar_AR" />
 
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="نتيجة الطالب - نظام الاستعلام عن النتائج" />
   <meta name="twitter:description" content="استعلام سريع عن النتائج الدراسية ومشاركة النتيجة." />
-  <meta name="twitter:image" content="https://mohamednasr5.github.io/natega/preview.jpg" />
+  <meta name="twitter:image" content="https://mohamednasr5.github.io/natega/preview.png" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,7 +32,6 @@
       --line:#e2e8f0;
       --soft:#f8fafc;
       --shadow:0 15px 40px rgba(15,23,42,.12);
-      --radius:22px;
 
       --green:#16a34a;
       --green2:#15803d;
@@ -41,8 +40,6 @@
 
       --blue:#2563eb;
       --blue2:#1d4ed8;
-      --blueSoft:#eff6ff;
-      --blueBorder:#bfdbfe;
 
       --orange:#f59e0b;
       --orange2:#ea580c;
@@ -107,7 +104,7 @@
       border:1px solid rgba(255,255,255,.14);
       border-radius:24px;
       padding:18px;
-      box-shadow:var(--shadow);
+      box-shadow:0 15px 40px rgba(15,23,42,.12);
       margin-bottom:24px;
     }
 
@@ -194,7 +191,7 @@
       background:var(--card);
       color:var(--text);
       border-radius:28px;
-      box-shadow:var(--shadow);
+      box-shadow:0 15px 40px rgba(15,23,42,.12);
       overflow:visible;
       border:1px solid rgba(226,232,240,.9);
     }
@@ -657,7 +654,7 @@
             <div class="stat stat-total">
               <div class="stat-icon">🧮</div>
               <h3>المجموع الكلي</h3>
-              <div class="big"><span id="totalScore">0</span> / <span id="maxScore">280</span></div>
+              <div class="big"><span id="totalScore">0</span> / <span id="maxScore">140</span></div>
               <span class="small">الإجمالي النهائي</span>
             </div>
 
@@ -694,11 +691,11 @@
           <div class="term-results">
             <div class="term-box">
               <h3>الفصل الدراسي الأول</h3>
-              <p id="term1Result">—</p>
+              <p id="term1Result">غير متوفر</p>
             </div>
             <div class="term-box">
               <h3>الفصل الدراسي الثاني</h3>
-              <p id="term2Result">—</p>
+              <p id="term2Result">غير متوفر</p>
             </div>
           </div>
 
@@ -763,88 +760,8 @@
 
   <script>
     const SITE_URL = "https://mohamednasr5.github.io/natega/";
+    const API_URL = "https://natega.studegy10.workers.dev";
     const DEVELOPER_NAME = "المهندس محمد حماد";
-
-    const demoStudents = [
-      {
-        seatNumber: "1001",
-        name: "أحمد محمد علي",
-        grade: "الصف الثالث الإعدادي",
-        school: "مدرسة النور الإعدادية",
-        department: "إدارة شرق التعليمية",
-        total: 263,
-        maxTotal: 280,
-        percentage: 93.9,
-        coreTotal: 131.5,
-        coreMax: 140,
-        finalStatus: "ناجح",
-        term1Result: "128 درجة - ناجح",
-        term2Result: "135 درجة - ناجح",
-        subjects: [
-          { name: "اللغة العربية", score: 47, max: 50, grade: "ممتاز" },
-          { name: "اللغة الإنجليزية", score: 45, max: 50, grade: "ممتاز" },
-          { name: "الرياضيات", score: 46, max: 50, grade: "ممتاز" },
-          { name: "العلوم", score: 39, max: 40, grade: "ممتاز" },
-          { name: "الدراسات", score: 38, max: 40, grade: "جيد جدًا" }
-        ],
-        extras: [
-          { name: "التربية الدينية", score: 19, status: "ناجح" },
-          { name: "الحاسب الآلي", score: 20, status: "ناجح" }
-        ]
-      },
-      {
-        seatNumber: "1002",
-        name: "سارة محمود حسن",
-        grade: "الصف الثالث الإعدادي",
-        school: "مدرسة السلام الإعدادية",
-        department: "إدارة غرب التعليمية",
-        total: 228,
-        maxTotal: 280,
-        percentage: 81.4,
-        coreTotal: 119,
-        coreMax: 140,
-        finalStatus: "ناجحة",
-        term1Result: "110 درجة - ناجحة",
-        term2Result: "118 درجة - ناجحة",
-        subjects: [
-          { name: "اللغة العربية", score: 42, max: 50, grade: "جيد جدًا" },
-          { name: "اللغة الإنجليزية", score: 38, max: 50, grade: "جيد" },
-          { name: "الرياضيات", score: 40, max: 50, grade: "جيد جدًا" },
-          { name: "العلوم", score: 36, max: 40, grade: "جيد جدًا" },
-          { name: "الدراسات", score: 34, max: 40, grade: "جيد" }
-        ],
-        extras: [
-          { name: "التربية الدينية", score: 17, status: "ناجحة" },
-          { name: "الحاسب الآلي", score: 19, status: "ناجحة" }
-        ]
-      },
-      {
-        seatNumber: "1003",
-        name: "محمد خالد إبراهيم",
-        grade: "الصف الثالث الإعدادي",
-        school: "مدرسة النهضة الإعدادية",
-        department: "إدارة وسط التعليمية",
-        total: 118,
-        maxTotal: 280,
-        percentage: 42.1,
-        coreTotal: 58,
-        coreMax: 140,
-        finalStatus: "راسب",
-        term1Result: "55 درجة - راسب",
-        term2Result: "63 درجة - راسب",
-        subjects: [
-          { name: "اللغة العربية", score: 21, max: 50, grade: "ضعيف" },
-          { name: "اللغة الإنجليزية", score: 18, max: 50, grade: "ضعيف" },
-          { name: "الرياضيات", score: 22, max: 50, grade: "ضعيف" },
-          { name: "العلوم", score: 14, max: 40, grade: "ضعيف" },
-          { name: "الدراسات", score: 13, max: 40, grade: "ضعيف" }
-        ],
-        extras: [
-          { name: "التربية الدينية", score: 11, status: "راسب" },
-          { name: "الحاسب الآلي", score: 10, status: "راسب" }
-        ]
-      }
-    ];
 
     let currentStudent = null;
 
@@ -859,13 +776,14 @@
       statusText.style.color = color;
     }
 
-    function findStudentBySeat(seatNumber){
-      return demoStudents.find(s => String(s.seatNumber) === String(seatNumber).trim());
-    }
-
     function safeText(value, fallback = "—"){
       if (value === null || value === undefined || value === "") return fallback;
       return value;
+    }
+
+    function parsePercentage(value){
+      if (value === null || value === undefined || value === "") return 0;
+      return parseFloat(String(value).replace("%","").trim()) || 0;
     }
 
     function getGradeFromPercentage(percentage){
@@ -895,6 +813,64 @@
       }
       const percentage = Number(student.percentage) || 0;
       return percentage >= 50 ? "ناجح" : "راسب";
+    }
+
+    function scoreStatus(score, passMark){
+      return Number(score) >= Number(passMark) ? "ناجح" : "راسب";
+    }
+
+    function subjectGrade(score, max){
+      const p = (Number(score) / Number(max)) * 100;
+      if (p >= 85) return "ممتاز";
+      if (p >= 75) return "جيد جدًا";
+      if (p >= 65) return "جيد";
+      if (p >= 50) return "مقبول";
+      return "ضعيف";
+    }
+
+    async function fetchStudentBySeat(seatNumber){
+      const res = await fetch(`${API_URL}/?seat=${encodeURIComponent(seatNumber)}`);
+      const json = await res.json();
+
+      if (!json.ok || !json.data) {
+        return null;
+      }
+
+      const d = json.data;
+      const percentage = parsePercentage(d.percentage);
+      const finalGrade = d.grade || getGradeFromPercentage(percentage);
+      const finalStatus = percentage >= 50 ? "ناجح" : "راسب";
+
+      return {
+        seatNumber: d.seat_no,
+        name: d.student_name,
+        grade: d.grade_name,
+        school: d.school_name,
+        department: d.admin_name,
+        total: d.total,
+        maxTotal: 140,
+        percentage: percentage,
+        coreTotal: d.total,
+        coreMax: 140,
+        finalStatus: finalStatus,
+        finalGrade: finalGrade,
+        term1Result: d.level1 || "غير متوفر",
+        term2Result: d.level2 || "غير متوفر",
+        subjects: [
+          { name: "اللغة العربية", score: d.ar, max: 40, grade: subjectGrade(d.ar, 40) },
+          { name: "اللغة الإنجليزية", score: d.en, max: 30, grade: subjectGrade(d.en, 30) },
+          { name: "الدراسات", score: d.studies, max: 20, grade: subjectGrade(d.studies, 20) },
+          { name: "الجبر", score: d.algebra, max: 15, grade: subjectGrade(d.algebra, 15) },
+          { name: "الهندسة", score: d.geometry, max: 15, grade: subjectGrade(d.geometry, 15) },
+          { name: "الرياضيات", score: d.math_total, max: 30, grade: subjectGrade(d.math_total, 30) },
+          { name: "العلوم", score: d.science, max: 20, grade: subjectGrade(d.science, 20) }
+        ],
+        extras: [
+          { name: "التربية الدينية", score: d.religion, status: scoreStatus(d.religion, 10) },
+          { name: "التربية الفنية", score: d.art, status: scoreStatus(d.art, 5) },
+          { name: "الحاسب الآلي", score: d.computer, status: scoreStatus(d.computer, 5) }
+        ]
+      };
     }
 
     function fillTableRows(tbodyId, rows, cols){
@@ -949,15 +925,15 @@
       document.getElementById("schoolValue").textContent = safeText(student.school);
       document.getElementById("departmentValue").textContent = safeText(student.department);
       document.getElementById("totalScore").textContent = safeText(student.total, 0);
-      document.getElementById("maxScore").textContent = safeText(student.maxTotal, 280);
+      document.getElementById("maxScore").textContent = safeText(student.maxTotal, 140);
       document.getElementById("percentageValue").textContent = safeText(student.percentage, 0);
       document.getElementById("coreTotal").textContent = safeText(student.coreTotal, 0);
       document.getElementById("coreMax").textContent = safeText(student.coreMax, 140);
       document.getElementById("finalStatus").textContent = safeText(student.finalStatus);
-      document.getElementById("term1Result").textContent = safeText(student.term1Result || student.firstTerm || student.term1Total);
-      document.getElementById("term2Result").textContent = safeText(student.term2Result || student.secondTerm || student.term2Total);
+      document.getElementById("term1Result").textContent = safeText(student.term1Result, "غير متوفر");
+      document.getElementById("term2Result").textContent = safeText(student.term2Result, "غير متوفر");
 
-      const gradeText = getGradeFromPercentage(student.percentage);
+      const gradeText = student.finalGrade || getGradeFromPercentage(student.percentage);
       const passFailText = getPassFail(student);
 
       document.getElementById("gradeValueBox").textContent = gradeText;
@@ -980,7 +956,7 @@
       emptyState.style.display = "none";
     }
 
-    function searchResult(){
+    async function searchResult(){
       const seatNumber = seatInput.value.trim();
 
       if (!seatNumber){
@@ -992,8 +968,8 @@
 
       setStatus("جاري البحث عن نتيجتك…", "#bfdbfe");
 
-      setTimeout(() => {
-        const student = findStudentBySeat(seatNumber);
+      try {
+        const student = await fetchStudentBySeat(seatNumber);
 
         if (!student){
           setStatus("لم يتم العثور على نتيجة بهذا الرقم", "#fecaca");
@@ -1005,7 +981,11 @@
         renderResult(student);
         setStatus("تم العثور على النتيجة بنجاح", "#bbf7d0");
         document.getElementById("resultSection").scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 450);
+      } catch (error) {
+        setStatus("حدث خطأ أثناء الاتصال بمصدر البيانات", "#fecaca");
+        resultSection.style.display = "none";
+        emptyState.style.display = "block";
+      }
     }
 
     async function downloadImage(){
@@ -1084,10 +1064,12 @@
         `الاسم: ${safeText(currentStudent.name, "-")}`,
         `رقم الجلوس: ${safeText(currentStudent.seatNumber, "-")}`,
         `الصف: ${safeText(currentStudent.grade, "-")}`,
+        `المدرسة: ${safeText(currentStudent.school, "-")}`,
+        `الإدارة: ${safeText(currentStudent.department, "-")}`,
         `التقدير العام: ${safeText(document.getElementById("gradeValueBox").textContent, "—")}`,
         `الحالة: ${safeText(document.getElementById("passFailBox").textContent, "—")}`,
-        `الفصل الدراسي الأول: ${safeText(currentStudent.term1Result || currentStudent.firstTerm || currentStudent.term1Total, "غير متوفر")}`,
-        `الفصل الدراسي الثاني: ${safeText(currentStudent.term2Result || currentStudent.secondTerm || currentStudent.term2Total, "غير متوفر")}`,
+        `الفصل الدراسي الأول: ${safeText(currentStudent.term1Result, "غير متوفر")}`,
+        `الفصل الدراسي الثاني: ${safeText(currentStudent.term2Result, "غير متوفر")}`,
         `المجموع: ${safeText(currentStudent.total, "-")} / ${safeText(currentStudent.maxTotal, "-")}`,
         `النسبة: ${safeText(currentStudent.percentage, "-")}%`,
         "",
