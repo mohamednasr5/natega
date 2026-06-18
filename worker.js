@@ -1,142 +1,210 @@
 export default {
   async fetch(request) {
-    const url = new URL(request.url);
-    const seat = url.searchParams.get("seat");
-
-    if (url.pathname === "/search" && seat) {
-      const result = await searchAllSites(seat);
-      return new Response(buildHTML(seat, result), {
-        headers: { "Content-Type": "text/html;charset=UTF-8" },
-      });
+    if (request.method === "OPTIONS") {
+      return new Response(null, { headers: corsHeaders() });
     }
 
-    return new Response(buildHTML("", null), {
-      headers: { "Content-Type": "text/html;charset=UTF-8" },
-    });
+    const url = new URL(request.url);
+    const seat = (url.searchParams.get("seat") || "").trim();
+
+    if (!seat || !/^\d+$/.test(seat)) {
+      return jsonResponse({ ok: false, msg: "رقم جلوس غير صحيح" });
+    }
+
+    try {
+      const data = await searchAllSites(seat);
+      if (data) return jsonResponse({ ok: true, data });
+      return jsonResponse({ ok: false, msg: "لم يتم العثور على نتيجة لرقم الجلوس المدخل" });
+    } catch (e) {
+      return jsonResponse({ ok: false, msg: "حدث خطأ أثناء جلب النتيجة، حاول مرة أخرى" });
+    }
   },
 };
 
-async function searchAllSites(seat) {
-  const sites = [
-    { name: "مديرية التربية والتعليم بالدقهلية (الرسمي)", fn: () => fetchOfficial(seat) },
-    { name: "موقع نذاكر", fn: () => fetchNezakr(seat) },
-    { name: "موقع natiga4dk", fn: () => fetchNatiga4dk(seat) },
-  ];
+function corsHeaders() {
+  return {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+  };
+}
 
-  for (const site of sites) {
+function jsonResponse(obj) {
+  return new Response(JSON.stringify(obj), {
+    headers: {
+      "Content-Type": "application/json;charset=UTF-8",
+      ...corsHeaders(),
+    },
+  });
+}
+
+// Tries each source in order; first one that returns a usable result wins.
+async function searchAllSites(seat) {
+  const sources = [fetchOfficial, fetchNezakr, fetchNatiga4dk];
+  for (const fn of sources) {
     try {
-      const res = await site.fn();
-      if (res && res.found) {
-        res.source = site.name;
-        return res;
-      }
+      const data = await fn(seat);
+      if (data) return data;
     } catch (e) {
       continue;
     }
   }
-
-  return { found: false };
+  return null;
 }
 
+// ───────────────────────────────────────────────────────────
+// SOURCE 1: the official Dakahlia directorate site (authoritative).
+// NOTE: I could not confirm the real AJAX endpoint this site uses —
+// I don't have a way to inspect its JS/network calls from here.
+// These two URLs are educated guesses (one from this repo's own
+// README, one from the previous worker.js). If both miss, send me
+// the real request from your browser's Network tab (open
+// natiga.edudk.net/P20262026/public/index.html, search a real seat
+// number, copy the XHR/fetch URL + raw JSON response) and I'll wire
+// it in exactly instead of guessing.
+// ───────────────────────────────────────────────────────────
 async function fetchOfficial(seat) {
-  const r = await fetch(`https://natiga.edudk.net/P20262026/public/api/students/${seat}`, {
-    headers: {
-      Accept: "application/json",
-      Referer: "https://natiga.edudk.net/P20262026/public/index.html",
-      "User-Agent": "Mozilla/5.0",
-    },
-  });
-  if (!r.ok) return { found: false };
-  const text = await r.text();
-  if (!text || text.trim() === "") return { found: false };
-  let data;
-  try {
-    data = JSON.parse(text);
-  } catch {
-    return { found: false };
+  const candidates = [
+    `https://natiga.edudk.net/P20262026/public/api_result.php?seat=${seat}`,
+    `https://natiga.edudk.net/P20262026/public/api/students/${seat}`,
+  ];
+
+  for (const apiUrl of candidates) {
+    try {
+      const r = await fetch(apiUrl, {
+        headers: {
+          Accept: "application/json",
+          Referer: "https://natiga.edudk.net/P20262026/public/index.html",
+          "User-Agent": "Mozilla/5.0",
+        },
+      });
+      if (!r.ok) continue;
+      const text = await r.text();
+      if (!text || !text.trim()) continue;
+      let raw;
+      try {
+        raw = JSON.parse(text);
+      } catch {
+        continue;
+      }
+      const mapped = mapOfficial(raw);
+      if (mapped) return mapped;
+    } catch (e) {
+      continue;
+    }
   }
-  if (!data || (!data.name && !data.student_name && !data.ar_name)) return { found: false };
+  return null;
+}
+
+function pick(obj, keys) {
+  for (const k of keys) {
+    if (obj[k] !== undefined && obj[k] !== null && obj[k] !== "") return obj[k];
+  }
+  return undefined;
+}
+
+function numOr(v, fallback) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+// Maps whatever shape the official API returns into the exact schema
+// index.html's renderResult() expects. Field-name guesses are listed
+// as alternatives since the real response shape is unconfirmed.
+function mapOfficial(raw) {
+  if (!raw) return null;
+  const d = raw.data || raw.result || raw; // unwrap common envelope shapes
+  const name = pick(d, ["student_name", "name", "ar_name"]);
+  if (!name) return null;
+
+  const algebra = numOr(pick(d, ["algebra"]), 0);
+  const geometry = numOr(pick(d, ["geometry"]), 0);
+
   return {
-    found: true,
-    name: data.name || data.student_name || data.ar_name || "—",
-    seat,
-    total: data.total || data.sum || data.degree || "—",
-    outOf: data.out_of || data.max || data.total_mark || "—",
-    percentage: data.percentage || data.percent || "—",
-    grade: data.grade || data.result || data.taqdir || "—",
-    school: data.school || data.school_name || data.ar_school || "—",
-    admin: data.admin || data.admin_name || data.ar_admin || "—",
-    term: data.term || data.semester || "—",
-    year: data.year || "2025/2026",
-    subjects: data.subjects || data.marks || [],
+    student_name: name,
+    seat_no: pick(d, ["seat_no", "seat", "seat_number"]) ?? "",
+    grade_name: pick(d, ["grade_name", "grade", "stage"]) ?? "الثالث الإعدادي",
+    school_name: pick(d, ["school_name", "school", "ar_school"]) ?? "",
+    admin_name: pick(d, ["admin_name", "admin", "ar_admin"]) ?? "",
+    total: numOr(pick(d, ["total", "sum", "degree"]), 0),
+    ar: numOr(pick(d, ["ar", "arabic"]), 0),
+    en: numOr(pick(d, ["en", "english"]), 0),
+    studies: numOr(pick(d, ["studies", "social_studies"]), 0),
+    algebra,
+    geometry,
+    math_total: numOr(pick(d, ["math_total", "math"]), algebra + geometry),
+    science: numOr(pick(d, ["science"]), 0),
+    religion: numOr(pick(d, ["religion"]), 0),
+    art: numOr(pick(d, ["art"]), 0),
+    computer: numOr(pick(d, ["computer"]), 0),
+    level1: pick(d, ["level1"]) ?? null,
+    level2: pick(d, ["level2"]) ?? null,
   };
 }
 
+// ───────────────────────────────────────────────────────────
+// SOURCE 2 (fallback): nezakr — scraped via regex since there's no
+// official API. Same caveat as above: I'm working from your patch's
+// hints (title tag, label-then-nearby-fraction), not a real saved
+// page, so treat this as a best effort. If it still misses, send me
+// the actual HTML of a real result page from this site and I'll fit
+// the patterns exactly.
+// ───────────────────────────────────────────────────────────
 async function fetchNezakr(seat) {
-  const pageUrl = `https://natiga.nezakr.net/dakahlia/num/${seat}/`;
-  const r = await fetch(pageUrl, {
+  const r = await fetch(`https://natiga.nezakr.net/dakahlia/num/${seat}/`, {
     headers: { Accept: "text/html", "User-Agent": "Mozilla/5.0" },
   });
-  if (!r.ok) return { found: false };
+  if (!r.ok) return null;
   const html = await r.text();
-  if (html.includes("لم يتم العثور") || html.includes("غير موجود")) return { found: false };
+  if (html.includes("لم يتم العثور") || html.includes("غير موجود")) return null;
 
-  const nameMatch =
-    html.match(/class="[^"]*student[^"]*"[^>]*>\s*([^<]{5,80})/i) ||
-    html.match(/<h[123][^>]*>\s*([^\u0000-\u007F][^<]{4,79})\s*<\/h[123]>/i);
-  const name = nameMatch ? nameMatch[1].trim() : null;
-  if (!name || name.includes("نذاكر") || name.includes("نتيجة")) return { found: false };
+  const titleMatch = html.match(/<title>\s*نتيجة الطالب\s+([^<]+?)\s+بالشهادة/);
+  const headingMatch = html.match(/<h[123][^>]*>\s*([^\u0000-\u007F][^<]{4,79})\s*<\/h[123]>/i);
+  const name = titleMatch ? titleMatch[1].trim() : headingMatch ? headingMatch[1].trim() : null;
+  if (!name || name.includes("نذاكر") || name.includes("نتيجة")) return null;
 
-  const totalMatch = html.match(/(\d+)\s*\/\s*(\d+)/);
-  const percentMatch = html.match(/(\d+(?:\.\d+)?)\s*%/);
-  const gradeMatch = html.match(/ممتاز|جيد جداً|جيد|مقبول|راسب|ضعيف/);
+  const totalMatch = html.match(/([\d.]+)\s*\/\s*(\d+)/);
+  const total = totalMatch ? parseFloat(totalMatch[1]) : 0;
+
+  const school = extractBetween(html, "المدرسة");
+  const admin = extractBetween(html, "الإدارة");
+
+  const ar = extractSubject(html, "العربية");
+  const en = extractSubject(html, "الانجليزية") || extractSubject(html, "الإنجليزية");
+  const algebra = extractSubject(html, "الجبر");
+  const geometry = extractSubject(html, "الهندسة");
+  const science = extractSubject(html, "العلوم");
+  const studies = extractSubject(html, "الدراسات");
 
   return {
-    found: true,
-    name,
-    seat,
-    total: totalMatch ? totalMatch[1] : "—",
-    outOf: totalMatch ? totalMatch[2] : "—",
-    percentage: percentMatch ? percentMatch[1] + "%" : "—",
-    grade: gradeMatch ? gradeMatch[0] : "—",
-    school: extractBetween(html, "المدرسة") || "—",
-    admin: extractBetween(html, "الإدارة") || "—",
-    term: extractBetween(html, "الفصل") || "—",
-    year: "2025/2026",
-    subjects: [],
+    student_name: name,
+    seat_no: seat,
+    grade_name: "الثالث الإعدادي",
+    school_name: school || "",
+    admin_name: admin || "",
+    total,
+    ar,
+    en,
+    studies,
+    algebra,
+    geometry,
+    math_total: algebra + geometry,
+    science,
+    religion: 0,
+    art: 0,
+    computer: 0,
+    level1: null,
+    level2: null,
   };
 }
 
-async function fetchNatiga4dk(seat) {
-  const r = await fetch(`https://www.natiga4dk.com/dakahlia/seat/${seat}/`, {
-    headers: { Accept: "text/html", "User-Agent": "Mozilla/5.0" },
-  });
-  if (!r.ok) return { found: false };
-  const html = await r.text();
-  if (html.includes("غير موجودة") || html.includes("404")) return { found: false };
-
-  const nameMatch = html.match(/<h[123][^>]*>\s*([^\u0000-\u007F][^<]{4,79})\s*<\/h[123]>/i);
-  const name = nameMatch ? nameMatch[1].trim() : null;
-  if (!name) return { found: false };
-
-  const totalMatch = html.match(/(\d+)\s*\/\s*(\d+)/);
-  const percentMatch = html.match(/(\d+(?:\.\d+)?)\s*%/);
-  const gradeMatch = html.match(/ممتاز|جيد جداً|جيد|مقبول|راسب|ضعيف/);
-
-  return {
-    found: true,
-    name,
-    seat,
-    total: totalMatch ? totalMatch[1] : "—",
-    outOf: totalMatch ? totalMatch[2] : "—",
-    percentage: percentMatch ? percentMatch[1] + "%" : "—",
-    grade: gradeMatch ? gradeMatch[0] : "—",
-    school: "—",
-    admin: "—",
-    term: "—",
-    year: "2025/2026",
-    subjects: [],
-  };
+// Looks for a subject label, then the nearest "x/y" fraction after it.
+function extractSubject(html, label) {
+  const idx = html.indexOf(label);
+  if (idx === -1) return 0;
+  const chunk = html.slice(idx, idx + 200);
+  const m = chunk.match(/([\d.]+)\s*\/\s*\d+/);
+  return m ? parseFloat(m[1]) : 0;
 }
 
 function extractBetween(html, label) {
@@ -147,139 +215,44 @@ function extractBetween(html, label) {
   return m ? m[1].trim() : null;
 }
 
-function escapeHTML(str) {
-  return String(str ?? "").replace(/[&<>"']/g, (c) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;",
-  }[c]));
-}
+// ───────────────────────────────────────────────────────────
+// SOURCE 3 (last-resort fallback): natiga4dk — only name + total
+// recovered reliably without a real page sample to test selectors
+// against. Better than nothing if the first two sources are down.
+// ───────────────────────────────────────────────────────────
+async function fetchNatiga4dk(seat) {
+  const r = await fetch(`https://www.natiga4dk.com/dakahlia/seat/${seat}/`, {
+    headers: { Accept: "text/html", "User-Agent": "Mozilla/5.0" },
+  });
+  if (!r.ok) return null;
+  const html = await r.text();
+  if (html.includes("غير موجودة") || html.includes("404")) return null;
 
-function gradeColor(g) {
-  if (!g || g === "—") return "#6b7280";
-  if (g.includes("ممتاز")) return "#16a34a";
-  if (g.includes("جيد جداً")) return "#2563eb";
-  if (g.includes("جيد")) return "#7c3aed";
-  if (g.includes("مقبول")) return "#d97706";
-  return "#dc2626";
-}
+  const nameMatch = html.match(/<h[123][^>]*>\s*([^\u0000-\u007F][^<]{4,79})\s*<\/h[123]>/i);
+  const name = nameMatch ? nameMatch[1].trim() : null;
+  if (!name) return null;
 
-function subjectsTable(subjects) {
-  if (!subjects || subjects.length === 0) return "";
-  const rows = subjects
-    .map((s) => {
-      const grade = s.grade || s.taqdir || "—";
-      return `
-    <tr>
-      <td>${escapeHTML(s.name || s.subject || s.ar_name || "—")}</td>
-      <td><strong>${escapeHTML(s.degree || s.mark || s.score || "—")}</strong></td>
-      <td>${escapeHTML(s.out_of || s.max || s.full_mark || "—")}</td>
-      <td style="color:${gradeColor(grade)}">${escapeHTML(grade)}</td>
-    </tr>`;
-    })
-    .join("");
-  return `
-    <div class="subjects-card">
-      <h3>📋 درجات المواد</h3>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>المادة</th><th>الدرجة</th><th>من</th><th>التقدير</th></tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>
-    </div>`;
-}
+  const totalMatch = html.match(/([\d.]+)\s*\/\s*(\d+)/);
+  const total = totalMatch ? parseFloat(totalMatch[1]) : 0;
 
-function buildHTML(seat, result) {
-  const resultSection =
-    result === null
-      ? ""
-      : result.found
-      ? `<div class="result-card">
-        <div class="student-name">${escapeHTML(result.name)}</div>
-        <span class="badge" style="background:${gradeColor(result.grade)}">${escapeHTML(result.grade)}</span>
-        <div class="stats">
-          <div class="stat"><div class="val">${escapeHTML(result.total)}/${escapeHTML(result.outOf)}</div><div class="lbl">المجموع</div></div>
-          <div class="stat"><div class="val">${escapeHTML(result.percentage)}</div><div class="lbl">النسبة</div></div>
-          <div class="stat"><div class="val">${escapeHTML(result.year)}</div><div class="lbl">العام الدراسي</div></div>
-        </div>
-        <div class="info-grid">
-          <div class="info-item"><span class="info-lbl">🏫 المدرسة</span><span>${escapeHTML(result.school)}</span></div>
-          <div class="info-item"><span class="info-lbl">🏛️ الإدارة</span><span>${escapeHTML(result.admin)}</span></div>
-          <div class="info-item"><span class="info-lbl">📅 الفصل</span><span>${escapeHTML(result.term)}</span></div>
-          <div class="info-item"><span class="info-lbl">🔢 رقم الجلوس</span><span>${escapeHTML(result.seat)}</span></div>
-        </div>
-        ${subjectsTable(result.subjects)}
-        <div class="source-tag">✅ المصدر: ${escapeHTML(result.source)}</div>
-      </div>`
-      : `<div class="error-card">❌ لم يتم العثور على نتيجة لرقم الجلوس: <strong>${escapeHTML(seat)}</strong><br>تأكد من الرقم أو انتظر ظهور النتيجة الرسمية.</div>`;
-
-  return `<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>نتيجة الشهادة الإعدادية - الدقهلية 2026</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:linear-gradient(135deg,#1e3a5f,#2d6a9f);min-height:100vh;padding:20px;color:#333}
-.container{max-width:700px;margin:0 auto}
-.header{text-align:center;color:#fff;margin-bottom:30px}
-.header h1{font-size:1.8rem;margin-bottom:8px}
-.header p{opacity:.85;font-size:.95rem}
-.search-card{background:#fff;border-radius:16px;padding:30px;box-shadow:0 8px 32px rgba(0,0,0,.15);margin-bottom:24px}
-.search-card h2{margin-bottom:20px;color:#1e3a5f;font-size:1.2rem}
-.input-row{display:flex;gap:10px}
-input[type=text]{flex:1;padding:14px 18px;border:2px solid #e5e7eb;border-radius:10px;font-size:1rem;direction:ltr;text-align:center;transition:.2s}
-input[type=text]:focus{outline:none;border-color:#2d6a9f}
-button{padding:14px 28px;background:linear-gradient(135deg,#1e3a5f,#2d6a9f);color:#fff;border:none;border-radius:10px;font-size:1rem;cursor:pointer;font-weight:bold;transition:.2s}
-button:hover{opacity:.9;transform:translateY(-1px)}
-.result-card{background:#fff;border-radius:16px;padding:30px;box-shadow:0 8px 32px rgba(0,0,0,.15);margin-top:24px;text-align:center}
-.student-name{font-size:1.6rem;font-weight:bold;color:#1e3a5f;margin-bottom:12px}
-.badge{display:inline-block;color:#fff;padding:6px 20px;border-radius:20px;font-size:1rem;font-weight:bold;margin-bottom:20px}
-.stats{display:flex;gap:16px;justify-content:center;margin-bottom:24px;flex-wrap:wrap}
-.stat{background:#f0f4ff;border-radius:12px;padding:16px 24px;min-width:130px}
-.val{font-size:1.4rem;font-weight:bold;color:#1e3a5f}
-.lbl{font-size:.8rem;color:#6b7280;margin-top:4px}
-.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;text-align:right;margin-bottom:20px}
-.info-item{background:#f9fafb;border-radius:10px;padding:12px 16px;display:flex;flex-direction:column;gap:4px}
-.info-lbl{font-size:.8rem;color:#6b7280}
-.subjects-card{background:#f9fafb;border-radius:12px;padding:20px;margin-top:20px;text-align:right}
-.subjects-card h3{margin-bottom:14px;color:#1e3a5f}
-.table-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:.9rem}
-th{background:#1e3a5f;color:#fff;padding:10px;text-align:center}
-td{padding:9px 10px;text-align:center;border-bottom:1px solid #e5e7eb}
-tr:hover td{background:#f0f4ff}
-.source-tag{margin-top:16px;font-size:.8rem;color:#6b7280;background:#f0f4ff;display:inline-block;padding:4px 12px;border-radius:20px}
-.error-card{background:#fff;border-radius:16px;padding:30px;box-shadow:0 8px 32px rgba(0,0,0,.15);margin-top:24px;text-align:center;color:#dc2626;font-size:1.1rem;line-height:1.8}
-footer{text-align:center;color:#fff;opacity:.7;font-size:.8rem;margin-top:30px}
-@media(max-width:480px){.info-grid{grid-template-columns:1fr}.stats{gap:10px}.stat{padding:12px 16px;min-width:100px}}
-</style>
-</head>
-<body>
-<div class="container">
-  <div class="header">
-    <h1>📜 نتيجة الشهادة الإعدادية</h1>
-    <p>محافظة الدقهلية - العام الدراسي 2025/2026</p>
-  </div>
-
-  <div class="search-card">
-    <h2>🔍 ابحث برقم الجلوس</h2>
-    <form method="GET" action="/search">
-      <div class="input-row">
-        <input type="text" name="seat" placeholder="أدخل رقم الجلوس" value="${escapeHTML(seat)}" required pattern="\\d+" inputmode="numeric" maxlength="10">
-        <button type="submit">بحث</button>
-      </div>
-    </form>
-  </div>
-
-  ${resultSection}
-
-  <footer>هذه الخدمة تجمع النتائج من مصادر متعددة لتسهيل الوصول إليها، ويُنصح دائمًا بالتأكد من الموقع الرسمي.</footer>
-</div>
-</body>
-</html>`;
+  return {
+    student_name: name,
+    seat_no: seat,
+    grade_name: "الثالث الإعدادي",
+    school_name: "",
+    admin_name: "",
+    total,
+    ar: 0,
+    en: 0,
+    studies: 0,
+    algebra: 0,
+    geometry: 0,
+    math_total: 0,
+    science: 0,
+    religion: 0,
+    art: 0,
+    computer: 0,
+    level1: null,
+    level2: null,
+  };
 }
