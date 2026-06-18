@@ -3,14 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>🎓 نتيجة الشهادة الإعدادية  | المهندس محمد نصر</title>
+<title>🎓 نتيجة الشهادة الإعدادية  | المهندس محمد نصر</title>
   <meta name="description" content="نظام الاستعلام عن نتائج الامتحانات" />
 
-  <!-- Open Graph -->
-  <meta property="og:title" content="نتيجة الشهادة الإعدادية" />
-  <meta property="og:description" content="استعلام عن النتائج الدراسية" />
-  <meta property="og:type" content="website" />
-
+  <!-- Meta tags for SEO and Social Media -->
+  <meta property="og:title" content="نتيجة الطالب" />
+  <meta property="og:description" content="نتيجة الشهادة الإعدادية - استعلام فوري" />
+  
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,417 +17,288 @@
 
   <style>
     :root {
-      /* Colors */
-      --primary: #3b82f6;
-      --primary-dark: #1d4ed8;
+      /* Color Palette */
+      --primary: #2563eb;
+      --primary-dark: #1e40af;
       --secondary: #64748b;
-      --accent: #f59e0b;
-      
       --bg-dark: #0f172a;
-      --bg-gradient-start: #1e293b;
-      --bg-gradient-end: #0f172a;
-      
-      --card-bg: rgba(255, 255, 255, 0.95);
-      --glass-bg: rgba(255, 255, 255, 0.08);
-      --glass-border: rgba(255, 255, 255, 0.1);
-      
+      --card-bg: #ffffff;
       --text-main: #1e293b;
-      --text-light: #f8fafc;
-      --text-muted: #94a3b8;
-
-      --success: #10b981;
-      --success-bg: #d1fae5;
-      --danger: #ef4444;
+      --success: #16a34a;
+      --success-bg: #dcfce7;
+      --danger: #dc2626;
       --danger-bg: #fee2e2;
-
-      /* Radius & Shadows */
-      --radius-md: 12px;
-      --radius-lg: 20px;
-      --radius-xl: 28px;
-      --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+      --warning: #ea580c;
+      
+      /* UI Variables */
+      --radius: 16px;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
+    
     body {
       font-family: "Cairo", sans-serif;
-      background: radial-gradient(circle at top right, #3b82f620, transparent 40%),
-                  radial-gradient(circle at bottom left, #8b5cf620, transparent 40%),
-                  linear-gradient(to bottom, var(--bg-gradient-start), var(--bg-gradient-end));
-      background-attachment: fixed;
-      color: var(--text-light);
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: white;
       min-height: 100vh;
       padding: 20px;
-      overflow-x: hidden;
       position: relative;
+      overflow-x: hidden;
     }
 
-    /* Background Shapes */
-    .shape { position: absolute; filter: blur(80px); z-index: -1; opacity: 0.5; animation: float 20s infinite ease-in-out; pointer-events: none; }
-    .shape-1 { top: -10%; right: -10%; width: 400px; height: 400px; background: #3b82f6; }
-    .shape-2 { bottom: -10%; left: -10%; width: 350px; height: 350px; background: #8b5cf6; animation-delay: -5s; }
-    
-    @keyframes float {
-      0%, 100% { transform: translate(0, 0); }
-      50% { transform: translate(30px, -30px); }
+    /* Background decorative shapes */
+    .bg-shape {
+      position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.4; z-index: 0; pointer-events: none;
     }
+    .s1 { top: -50px; right: -50px; width: 300px; height: 300px; background: var(--primary); animation: float 10s infinite alternate; }
+    .s2 { bottom: -50px; left: -50px; width: 250px; height: 250px; background: #7c3aed; animation: float 12s infinite alternate-reverse; }
 
-    .container { width: 100%; max-width: 1100px; margin: 0 auto; position: relative; z-index: 1; }
+    @keyframes float { 0% { transform: translate(0,0); } 100% { transform: translate(30px, 50px); } }
+
+    .container { max-width: 900px; margin: 0 auto; position: relative; z-index: 1; }
 
     /* Header */
-    header { text-align: center; margin-bottom: 40px; padding-top: 20px; animation: fadeInDown 0.8s ease; }
-    header h1 {
-      font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 900;
-      background: linear-gradient(135deg, #fff 0%, #93c5fd 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      margin-bottom: 10px; text-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.5);
-    }
-    header p { font-size: 1.1rem; color: var(--text-muted); font-weight: 500; }
+    header { text-align: center; margin-bottom: 30px; padding-top: 20px; animation: fadeIn 0.8s ease; }
+    header h1 { font-size: 2.5rem; font-weight: 900; margin-bottom: 8px; background: linear-gradient(to right, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    header p { color: #94a3b8; font-size: 1.1rem; }
 
-    /* Search */
-    .search-wrapper { max-width: 600px; margin: 0 auto 40px; animation: fadeInUp 0.8s 0.2s ease backwards; }
-    .search-card {
-      background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--glass-border); border-radius: var(--radius-xl);
-      padding: 10px; display: flex; gap: 10px; box-shadow: var(--shadow-glow);
-      transition: transform 0.3s ease;
+    /* Search Box */
+    .search-box {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 8px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,0.1);
+      display: flex; gap: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s;
     }
-    .search-card:focus-within { transform: translateY(-2px); box-shadow: 0 0 30px rgba(59, 130, 246, 0.4); }
-    .seat-input {
-      flex: 1; background: rgba(255, 255, 255, 0.1); border: none; outline: none;
-      padding: 0 20px; border-radius: var(--radius-lg); color: #fff; font-size: 1.1rem; font-family: inherit;
+    .search-box:focus-within { transform: translateY(-2px); border-color: rgba(255,255,255,0.3); }
+
+    input[type="text"] {
+      flex: 1; background: transparent; border: none; color: white; font-size: 1.1rem;
+      padding: 10px 15px; font-family: inherit;
     }
-    .seat-input::placeholder { color: rgba(255, 255, 255, 0.5); }
-    
+    input::placeholder { color: rgba(255,255,255,0.5); }
+
     .btn {
-      border: none; cursor: pointer; font-family: inherit; border-radius: var(--radius-lg);
-      padding: 0 24px; font-size: 1rem; font-weight: 700; transition: all 0.3s;
-      display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px;
+      background: var(--primary); color: white; border: none; padding: 0 25px;
+      border-radius: 12px; font-weight: 700; cursor: pointer; font-family: inherit;
+      transition: background 0.3s; display: flex; align-items: center; gap: 8px; min-height: 50px;
     }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      color: #fff; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-    }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5); }
-    
-    /* Loader */
-    .loader {
-      width: 20px; height: 20px; border: 3px solid #ffffff; border-bottom-color: transparent;
-      border-radius: 50%; display: inline-block; animation: rotation 1s linear infinite; display: none;
-    }
-    @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .status-msg { text-align: center; margin-top: 15px; font-size: 0.95rem; height: 24px; font-weight: 600; }
-    
+    .btn:hover { background: var(--primary-dark); }
+    .btn:disabled { opacity: 0.7; cursor: wait; }
+
+    .status-msg { text-align: center; margin-top: 10px; height: 20px; color: #cbd5e1; font-size: 0.95rem; }
+
     /* Result Card */
-    .result-wrap { display: none; }
     .result-card {
-      background: var(--card-bg); color: var(--text-main); border-radius: var(--radius-xl);
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.5);
+      background: var(--card-bg);
+      color: var(--text-main);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: none; /* Hidden by default */
+      animation: slideUp 0.5s ease;
     }
-    .result-head {
-      background: linear-gradient(135deg, #eff6ff, #dbeafe); padding: 30px;
-      position: relative; overflow: hidden;
+
+    .card-header {
+      background: linear-gradient(135deg, #eff6ff, #dbeafe);
+      padding: 25px;
+      border-bottom: 1px solid #e2e8f0;
+      position: relative;
     }
+    
     .badge {
-      background: #fff; color: var(--success); padding: 6px 16px; border-radius: 50px;
-      font-weight: 800; font-size: 0.9rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-      border: 1px solid var(--success-bg); display: inline-block;
+      position: absolute; top: 20px; left: 20px;
+      padding: 6px 14px; border-radius: 50px; font-weight: 700; font-size: 0.9rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
-    .badge.fail { color: var(--danger); border-color: var(--danger-bg); }
-    .student-name { font-size: 1.8rem; font-weight: 800; margin-top: 15px; color: #0f172a; }
-    
-    .result-body { padding: 30px; }
+    .badge.pass { background: white; color: var(--success); border: 1px solid var(--success-bg); }
+    .badge.fail { background: white; color: var(--danger); border: 1px solid var(--danger-bg); }
 
-    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
-    .info-box { background: #f8fafc; padding: 15px; border-radius: var(--radius-md); border: 1px solid #e2e8f0; }
-    .info-label { font-size: 0.85rem; color: var(--secondary); display: block; margin-bottom: 4px; }
-    .info-value { font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
+    .student-name { font-size: 1.8rem; font-weight: 800; color: #0f172a; margin-bottom: 5px; }
+    .student-details { color: #64748b; font-size: 0.95rem; display: flex; gap: 15px; flex-wrap: wrap; }
+    .detail-item span { font-weight: 700; color: #334155; }
 
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; margin-bottom: 30px; }
-    .stat-card { padding: 20px; border-radius: var(--radius-lg); text-align: center; border: 1px solid transparent; }
-    .stat-icon { font-size: 2rem; margin-bottom: 10px; display: block; }
-    .stat-value { font-size: 1.8rem; font-weight: 900; display: block; }
-    .stat-label { font-size: 0.9rem; opacity: 0.8; margin-top: 5px; display: block; }
-    
-    .stat-total { background: var(--success-bg); color: #065f46; border-color: #a7f3d0; }
-    .stat-grade { background: #f3e8ff; color: #6b21a8; border-color: #e9d5ff; }
-    .stat-percent { background: #cffafe; color: #0e7490; border-color: #a5f3fc; }
-    .stat-core { background: #ffedd5; color: #9a3412; border-color: #fed7aa; }
-    .stat-pass { background: var(--success-bg); color: #065f46; border-color: #a7f3d0; }
-    .stat-fail { background: var(--danger-bg); color: #991b1b; border-color: #fecaca; }
+    .card-body { padding: 25px; }
 
+    /* Stats Grid */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 25px;
+    }
+    .stat-box {
+      background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px;
+      text-align: center; transition: transform 0.2s;
+    }
+    .stat-box:hover { transform: translateY(-3px); border-color: var(--primary); }
+    .stat-icon { font-size: 1.8rem; display: block; margin-bottom: 5px; }
+    .stat-value { font-size: 1.6rem; font-weight: 900; color: #0f172a; display: block; line-height: 1.2; }
+    .stat-label { font-size: 0.85rem; color: #64748b; margin-top: 5px; }
+
+    /* Tables */
     .section-title {
-      font-size: 1.2rem; font-weight: 800; margin: 25px 0 15px;
-      padding-right: 12px; border-right: 4px solid var(--primary); color: #1e293b;
+      font-size: 1.1rem; font-weight: 800; margin: 20px 0 10px;
+      padding-right: 10px; border-right: 4px solid var(--primary); color: #334155;
     }
-    .table-container { overflow-x: auto; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); margin-bottom: 20px; }
-    table { width: 100%; border-collapse: collapse; background: #fff; min-width: 500px; }
-    th, td { padding: 14px 16px; text-align: right; border-bottom: 1px solid #f1f5f9; }
-    th { background: #f8fafc; color: #64748b; font-weight: 700; font-size: 0.9rem; }
+
+    table { width: 100%; border-collapse: collapse; margin-bottom: 10px; background: white; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; }
+    th, td { padding: 12px; text-align: right; border-bottom: 1px solid #f1f5f9; font-size: 0.95rem; }
+    th { background: #f8fafc; color: #475569; font-weight: 700; font-size: 0.85rem; }
     tr:last-child td { border-bottom: none; }
 
-    /* Footer */
+    /* Footer & Actions */
     .footer-note {
-      margin-top: 30px; padding: 20px; background: #f8fafc; border-radius: var(--radius-md);
-      text-align: center; font-size: 0.95rem; color: #64748b; border: 1px dashed #cbd5e1;
+      margin-top: 25px; padding: 20px; background: #f1f5f9; border-radius: 12px;
+      text-align: center; border: 1px dashed #cbd5e1;
     }
     
-    /* Developer Links Styling */
-    .dev-links {
-      display: flex; justify-content: center; gap: 15px; margin-top: 12px; flex-wrap: wrap;
+    .dev-info {
+      margin-top: 10px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;
     }
     .dev-link {
-      text-decoration: none; padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 0.9rem;
-      display: inline-flex; align-items: center; gap: 5px; transition: transform 0.2s;
+      text-decoration: none; padding: 6px 12px; border-radius: 6px; font-size: 0.9rem; font-weight: 600;
+      display: flex; align-items: center; gap: 5px;
     }
-    .dev-link:hover { transform: translateY(-2px); filter: brightness(1.1); }
-    .dev-fb { background-color: #1877f2; color: white; }
-    .dev-wa { background-color: #25D366; color: white; }
+    .fb { background: #1877f2; color: white; }
+    .wa { background: #25D366; color: white; }
 
-    .action-bar { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 25px; justify-content: center; }
-    .btn-secondary { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); }
-    .btn-print { background: #333; color: white; }
-    .btn-whatsapp { background: #25D366; color: white; }
+    .actions { display: flex; gap: 10px; margin-top: 20px; justify-content: center; }
+    .btn-action {
+      background: #334155; color: white; border: none; padding: 10px 20px; border-radius: 8px;
+      cursor: pointer; font-family: inherit; font-weight: 600; display: flex; align-items: center; gap: 6px;
+    }
 
     /* Animations */
-    @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    .animate-in { animation: fadeInUp 0.6s ease forwards; opacity: 0; }
-    .delay-1 { animation-delay: 0.1s; } .delay-2 { animation-delay: 0.2s; } .delay-3 { animation-delay: 0.3s; } .delay-4 { animation-delay: 0.4s; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-    .empty-state { text-align: center; color: var(--text-muted); margin-top: 40px; }
-
-    /* Media Queries */
-    @media (max-width: 768px) {
-      .btn { width: 100%; }
-      .stats-grid { grid-template-columns: repeat(2, 1fr); }
-      .result-head, .result-body { padding: 20px; }
-      .student-name { font-size: 1.4rem; }
-    }
-
-    /* --- PRINT STYLES FIX --- */
+    /* Print Fix */
     @media print {
-      @page { size: A4 portrait; margin: 10mm; }
-      
-      body {
-        background: #fff !important;
-        color: #000 !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-        padding: 0;
-      }
-
-      /* Hide decorative elements */
-      .shape, .search-wrapper, .action-bar, .empty-state, header, .no-print {
-        display: none !important;
-      }
-
-      .container {
-        width: 100% !important;
-        max-width: 100% !important;
-        margin: 0 !important;
-      }
-
-      .result-wrap {
-        display: block !important;
-      }
-
-      .result-card {
-        box-shadow: none !important;
-        border: none !important;
-        border-radius: 0 !important;
-        background: #fff !important;
-        color: #000 !important;
-      }
-
-      .result-head, .result-body {
-        padding: 10px 0 !important;
-      }
-
-      .result-head {
-        background: none !important;
-        border-bottom: 2px solid #000 !important;
-        margin-bottom: 20px;
-      }
-
-      /* Ensure text is readable */
-      .result-card * {
-        color: #000 !important;
-        opacity: 1 !important;
-        text-shadow: none !important;
-        border-color: #ccc !important;
-      }
-      
-      .badge {
-        border: 1px solid #000 !important;
-        background: #fff !important;
-      }
-
-      .table-container {
-        overflow: visible !important;
-        box-shadow: none !important;
-      }
-
-      table {
-        width: 100%;
-        border: 1px solid #000;
-      }
-
-      th, td {
-        border: 1px solid #000;
-        padding: 8px;
-        font-size: 12px;
-      }
-
-      th {
-        background-color: #eee !important;
-        color: #000 !important;
-        -webkit-print-color-adjust: exact;
-      }
-
-      /* Reset animations */
-      .animate-in {
-        animation: none !important;
-        opacity: 1 !important;
-        transform: none !important;
-      }
+      body { background: white; color: black; padding: 0; }
+      .bg-shape, header, .search-box, .actions { display: none !important; }
+      .container { max-width: 100%; }
+      .result-card { box-shadow: none; display: block !important; }
+      .card-header { background: none !important; border-bottom: 2px solid black; padding: 10px 0; }
+      .badge { border: 1px solid black; background: white; position: static; display: inline-block; margin-bottom: 10px; }
+      .student-details { color: black; }
+      .stat-box { border: 1px solid #ccc; page-break-inside: avoid; }
+      table { border: 1px solid black; page-break-inside: auto; }
+      th, td { border-bottom: 1px solid #ccc; color: black; }
+      .card-body { padding: 0; }
+      * { text-shadow: none !important; -webkit-print-color-adjust: exact; }
+    }
+    
+    @media (max-width: 600px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      header h1 { font-size: 2rem; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Background Shapes (Hidden in Print) -->
-  <div class="shape shape-1"></div>
-  <div class="shape shape-2"></div>
+  <div class="bg-shape s1"></div>
+  <div class="bg-shape s2"></div>
 
   <div class="container">
-    <header class="no-print">
+    <header>
       <h1>🎓 نتيجة الطالب</h1>
-      <p>نظام الاستعلام السريع</p>
+      <p>نظام الاستعلام عن النتائج الدراسية</p>
     </header>
 
-    <!-- Search Section -->
-    <div class="search-wrapper no-print">
-      <div class="search-card">
-        <input type="text" id="seatNumber" class="seat-input" placeholder="أدخل رقم الجلوس..." inputmode="numeric" autocomplete="off" />
-        <button class="btn btn-primary" id="searchBtn">
-          <span class="btn-text">بحث</span>
-          <span class="loader"></span>
-        </button>
+    <!-- Search Area -->
+    <div class="search-box">
+      <input type="text" id="seatInput" placeholder="أدخل رقم الجلوس..." inputmode="numeric" autocomplete="off">
+      <button id="searchBtn" class="btn">
+        <span>بحث</span>
+        <span id="loader" style="display:none; width:18px; height:18px; border:2px solid #fff; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite;"></span>
+      </button>
+    </div>
+    <div class="status-msg" id="statusMsg"></div>
+
+    <!-- Result Card -->
+    <div class="result-card" id="resultCard">
+      <div class="card-header">
+        <span class="badge" id="statusBadge">—</span>
+        <div class="student-name" id="stuName">اسم الطالب</div>
+        <div class="student-details">
+          <div class="detail-item">الجلوس: <span id="stuSeat">—</span></div>
+          <div class="detail-item">المدرسة: <span id="stuSchool">—</span></div>
+          <div class="detail-item">الصف: <span id="stuGrade">—</span></div>
+        </div>
       </div>
-      <div class="status-msg" id="statusText">أدخل رقم الجلوس للبدء</div>
+
+      <div class="card-body">
+        <!-- Stats -->
+        <div class="stats-grid">
+          <div class="stat-box">
+            <span class="stat-icon">🧮</span>
+            <span class="stat-value" id="totalScore">0</span>
+            <span class="stat-label">المجموع الكلي</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-icon">📊</span>
+            <span class="stat-value" id="percentScore">0%</span>
+            <span class="stat-label">النسبة المئوية</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-icon" id="gradeIcon">🏅</span>
+            <span class="stat-value" id="gradeText">—</span>
+            <span class="stat-label">التقدير العام</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-icon">🏆</span>
+            <span class="stat-value" id="termResult">—</span>
+            <span class="stat-label">أفضل ترم</span>
+          </div>
+        </div>
+
+        <!-- Terms Info -->
+        <h3 class="section-title">تفاصيل الترمين</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+          <div style="background:#fff7ed; padding:10px; border-radius:8px; border:1px solid #fed7aa;">
+            <div style="font-size:0.85rem; color:#9a3412;">الترم الأول</div>
+            <div style="font-weight:bold; font-size:1.1rem; color:#7c2d12;" id="term1Display">—</div>
+          </div>
+          <div style="background:#fff7ed; padding:10px; border-radius:8px; border:1px solid #fed7aa;">
+            <div style="font-size:0.85rem; color:#9a3412;">الترم الثاني</div>
+            <div style="font-weight:bold; font-size:1.1rem; color:#7c2d12;" id="term2Display">—</div>
+          </div>
+        </div>
+
+        <!-- Subjects Table -->
+        <h3 class="section-title">الدرجات التفصيلية</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>المادة</th>
+              <th>الدرجة</th>
+              <th>الإجمالي</th>
+              <th>التقدير</th>
+            </tr>
+          </thead>
+          <tbody id="subjectsBody"></tbody>
+        </table>
+
+        <!-- Footer -->
+        <div class="footer-note">
+          <p>تم استخراج النتيجة إلكترونياً من قاعدة البيانات الرسمية</p>
+          <div class="dev-info">
+            <strong>المهندس محمد نصر</strong>
+            <a href="https://www.facebook.com/en.mohamed.nasr" target="_blank" class="dev-link fb">فيسبوك</a>
+            <a href="https://wa.me/201279934735" target="_blank" class="dev-link wa">واتساب</a>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Empty State -->
-    <div class="empty-state no-print" id="emptyState">بانتظار البحث...</div>
-
-    <!-- Result Section -->
-    <section class="result-wrap" id="resultSection">
-      <div class="result-card" id="printArea">
-        <!-- Header -->
-        <div class="result-head animate-in">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="font-size: 1.2rem; color: #333;">بيان نتيجة طالب</h2>
-            <span class="badge" id="finalStatus">—</span>
-          </div>
-          <div class="student-name" id="studentName">اسم الطالب</div>
-        </div>
-
-        <div class="result-body">
-          <!-- Info Grid -->
-          <div class="info-grid animate-in delay-1">
-            <div class="info-box"><span class="info-label">رقم الجلوس</span><span class="info-value" id="seatValue">—</span></div>
-            <div class="info-box"><span class="info-label">الصف</span><span class="info-value" id="gradeClassValue">—</span></div>
-            <div class="info-box"><span class="info-label">المدرسة</span><span class="info-value" id="schoolValue">—</span></div>
-            <div class="info-box"><span class="info-label">الإدارة</span><span class="info-value" id="departmentValue">—</span></div>
-          </div>
-
-          <!-- Stats Grid -->
-          <div class="stats-grid animate-in delay-2">
-            <div class="stat-card stat-total">
-              <span class="stat-icon">🧮</span>
-              <span class="stat-value" id="totalScore">0</span>
-              <span class="stat-label">من <span id="maxScore">140</span></span>
-            </div>
-            <div class="stat-card stat-grade">
-              <span class="stat-icon" id="gradeIcon">🏅</span>
-              <span class="stat-value" id="gradeValueBox">—</span>
-              <span class="stat-label">التقدير العام</span>
-            </div>
-            <div class="stat-card stat-percent">
-              <span class="stat-icon">%</span>
-              <span class="stat-value" id="percentageValue">0</span>
-              <span class="stat-label">النسبة المئوية</span>
-            </div>
-            <div class="stat-card stat-pass" id="passFailCard">
-              <span class="stat-icon" id="passFailIcon">✅</span>
-              <span class="stat-value" id="passFailBox">—</span>
-              <span class="stat-label">الحالة</span>
-            </div>
-            <div class="stat-card stat-core">
-              <span class="stat-icon">📚</span>
-              <span class="stat-value" id="coreTotal">0</span>
-              <span class="stat-label">مجموع الأساسي</span>
-            </div>
-          </div>
-
-          <!-- Term Results -->
-          <h3 class="section-title animate-in delay-2">نتيجة الفصلين</h3>
-          <div class="info-grid animate-in delay-2">
-            <div class="info-box" style="background: #fff7ed; border-color: #fed7aa;">
-              <span class="info-label">الفصل الدراسي الأول</span>
-              <span class="info-value" id="term1Result" style="color: #c2410c;">—</span>
-            </div>
-            <div class="info-box" style="background: #fff7ed; border-color: #fed7aa;">
-              <span class="info-label">الفصل الدراسي الثاني</span>
-              <span class="info-value" id="term2Result" style="color: #c2410c;">—</span>
-            </div>
-          </div>
-
-          <!-- Tables -->
-          <h3 class="section-title animate-in delay-3">المواد الأساسية</h3>
-          <div class="table-container animate-in delay-3">
-            <table>
-              <thead><tr><th>المادة</th><th>الدرجة</th><th>الإجمالي</th><th>التقدير</th></tr></thead>
-              <tbody id="subjectsBody"></tbody>
-            </table>
-          </div>
-
-          <h3 class="section-title animate-in delay-3">المواد خارج المجموع</h3>
-          <div class="table-container animate-in delay-3">
-            <table>
-              <thead><tr><th>المادة</th><th>الدرجة</th><th>الحالة</th></tr></thead>
-              <tbody id="extraBody"></tbody>
-            </table>
-          </div>
-
-          <!-- Updated Footer -->
-          <div class="footer-note animate-in delay-4">
-            <p style="font-weight: bold; color: #333;">تم استخراج هذه النتيجة آلياً</p>
-            <div style="margin-top: 15px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
-              <p>برمجة وتطوير: <strong>المهندس محمد نصر</strong> ❤️</p>
-              <div class="dev-links">
-                <a href="https://www.facebook.com/en.mohamed.nasr" target="_blank" class="dev-link dev-fb">
-                  📘 فيسبوك
-                </a>
-                <a href="https://wa.me/201279934735" target="_blank" class="dev-link dev-wa">
-                  📱 واتساب
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Action Buttons -->
-      <div class="action-bar no-print">
-        <button class="btn btn-secondary" id="downloadImageBtn">🖼️ صورة</button>
-        <button class="btn btn-secondary" id="downloadPdfBtn">📄 PDF</button>
-        <button class="btn btn-print" id="printBtn">🖨️ طباعة</button>
-        <button class="btn btn-whatsapp" id="whatsappBtn">💬 مشاركة</button>
-      </div>
-    </section>
+    <!-- Action Buttons -->
+    <div class="actions no-print">
+      <button onclick="window.print()" class="btn-action">🖨️ طباعة</button>
+      <button onclick="shareResult()" class="btn-action">💬 واتساب</button>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -437,149 +307,220 @@
   <script>
     const API_URL = "https://natega.studegy10.workers.dev";
     
-    // Elements
-    const seatInput = document.getElementById("seatNumber");
+    // DOM Elements
+    const seatInput = document.getElementById("seatInput");
     const searchBtn = document.getElementById("searchBtn");
-    const loader = document.querySelector(".loader");
-    const btnText = document.querySelector(".btn-text");
-    const statusText = document.getElementById("statusText");
-    const resultSection = document.getElementById("resultSection");
-    const emptyState = document.getElementById("emptyState");
-    const searchWrapper = document.querySelector(".search-wrapper");
+    const loader = document.getElementById("loader");
+    const statusMsg = document.getElementById("statusMsg");
+    const resultCard = document.getElementById("resultCard");
 
-    let currentStudent = null;
+    // Logic Constants
+    // Assuming Total Max for both terms (170) or Single Term (85). 
+    // We will calculate based on API data presence.
 
-    // Helpers
-    const safe = (v, f = "—") => (v ? v : f);
-    
-    async function getData(seat) {
+    async function fetchResult(seat) {
       try {
         const res = await fetch(`${API_URL}/?seat=${seat}`);
         const json = await res.json();
         return (json.ok && json.data) ? json.data : null;
-      } catch { return null; }
+      } catch (e) {
+        console.error(e);
+        return null;
+      }
     }
 
-    function getGrade(p) {
-      p = Number(p) || 0;
-      return p >= 85 ? "ممتاز" : p >= 75 ? "جيد جداً" : p >= 65 ? "جيد" : p >= 50 ? "مقبول" : "ضعيف";
+    // Helper: Determine Pass/Fail
+    function getStatus(isPass) {
+      if (isPass) return { text: "ناجح", class: "pass" };
+      return { text: "راسب", class: "fail" };
     }
 
-    function render(d) {
-      currentStudent = d;
-      const p = Number(d.percentage) || 0;
-      const grade = getGrade(p);
+    // Helper: Get Grade from Percentage
+    function calcGrade(p) {
+      if (p >= 85) return "ممتاز";
+      if (p >= 75) return "جيد جداً";
+      if (p >= 65) return "جيد";
+      if (p >= 50) return "مقبول";
+      return "ضعيف";
+    }
+
+    // Helper: Calculate Percentage based on Term availability
+    function calculateMetrics(data) {
+      // Logic: 
+      // 1. Check if Total is > 0 (Means Term 2 exists or full year).
+      // 2. If Total is 0, rely on Term 1.
       
-      document.getElementById("studentName").textContent = d.student_name;
-      document.getElementById("seatValue").textContent = d.seat_no;
-      document.getElementById("gradeClassValue").textContent = d.grade_name;
-      document.getElementById("schoolValue").textContent = d.school_name;
-      document.getElementById("departmentValue").textContent = d.admin_name;
-      document.getElementById("totalScore").textContent = d.total;
-      document.getElementById("percentageValue").textContent = p;
-      document.getElementById("coreTotal").textContent = d.total;
-      document.getElementById("finalStatus").textContent = p >= 50 ? "ناجح" : "راسب";
-      document.getElementById("gradeValueBox").textContent = grade;
-      document.getElementById("gradeIcon").textContent = grade === "ممتاز" ? "🏆" : grade === "جيد جداً" ? "🥇" : "🏅";
-      
-      const passCard = document.getElementById("passFailCard");
-      const passIcon = document.getElementById("passFailIcon");
-      const passText = document.getElementById("passFailBox");
-      
-      if (p >= 50) {
-        passCard.className = "stat-card stat-pass"; passIcon.textContent = "✔"; passText.textContent = "ناجح";
-      } else {
-        passCard.className = "stat-card stat-fail"; passIcon.textContent = "✖"; passText.textContent = "راسب";
+      let totalScore = parseFloat(data.total) || 0;
+      let maxScore = 170; // Standard full year max
+      let isFullYear = true;
+
+      // If total is missing or zero, we assume only Term 1 is active
+      if (!totalScore || totalScore === 0) {
+        // Check if we can sum term 1 subjects
+        const t1Score = (parseFloat(data.ar)||0) + (parseFloat(data.en)||0) + (parseFloat(data.studies)||0) + (parseFloat(data.algebra)||0) + (parseFloat(data.geometry)||0) + (parseFloat(data.math_total)||0) + (parseFloat(data.science)||0);
+        
+        if (t1Score > 0) {
+          totalScore = t1Score;
+          maxScore = 85; // Half of 170
+          isFullYear = false;
+        }
       }
 
-      document.getElementById("term1Result").textContent = safe(d.level1);
-      document.getElementById("term2Result").textContent = safe(d.level2);
+      // Calculate Percentage
+      let percentage = (totalScore / maxScore) * 100;
+      percentage = parseFloat(percentage.toFixed(1));
 
-      // Tables
-      const subs = [
-        ["اللغة العربية", d.ar, 40], ["اللغة الإنجليزية", d.en, 30], ["الدراسات", d.studies, 20],
-        ["الجبر", d.algebra, 15], ["الهندسة", d.geometry, 15], ["الرياضيات", d.math_total, 30], ["العلوم", d.science, 20]
-      ];
-      const tbody = document.getElementById("subjectsBody");
-      tbody.innerHTML = subs.map(s => `
-        <tr>
-          <td>${s[0]}</td>
-          <td style="font-weight:bold">${s[1]}</td>
-          <td>${s[2]}</td>
-          <td><span style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-size:0.85rem">${getGrade((s[1]/s[2])*100)}</span></td>
-        </tr>`).join("");
+      // Determine Pass/Fail
+      // Priority: API 'status' -> else Percentage >= 50
+      let isPass = percentage >= 50;
+      if (data.status) {
+        const s = String(data.status).toLowerCase();
+        if (s.includes('fail') || s.includes('راسب')) isPass = false;
+        if (s.includes('pass') || s.includes('ناجح')) isPass = true;
+      } else if (data.percentage) {
+         // If API sends percentage but no status, check it
+         const apiPerc = parseFloat(data.percentage);
+         if (apiPerc < 50) isPass = false;
+      }
 
-      const extras = [["التربية الدينية", d.religion], ["التربية الفنية", d.art], ["الحاسب الآلي", d.computer]];
-      const tbodyExtra = document.getElementById("extraBody");
-      tbodyExtra.innerHTML = extras.map(e => `
-        <tr>
-          <td>${e[0]}</td>
-          <td style="font-weight:bold">${e[1]}</td>
-          <td style="color:var(--success)">ناجح</td>
-        </tr>`).join("");
+      // Determine Grade
+      // Priority: API 'grade' -> else Calculated
+      let grade = data.grade || calcGrade(percentage);
 
-      emptyState.style.display = "none";
-      resultSection.style.display = "block";
+      // Best Term
+      // Compare level1 vs level2 if available
+      let bestTerm = "—";
+      const l1 = String(data.level1 || "").trim();
+      const l2 = String(data.level2 || "").trim();
       
-      // Reset animation
-      document.querySelectorAll(".animate-in").forEach(el => {
-        el.style.animation = 'none';
-        el.offsetHeight; // trigger reflow
-        el.style.animation = null;
-      });
-      
-      setTimeout(() => resultSection.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+      // Simple text comparison for "Best", or numeric if we could parse it
+      // Assuming format is like "ناجح 90%" or just "ناجح"
+      if (l1 && !l2) bestTerm = l1;
+      else if (!l1 && l2) bestTerm = l2;
+      else if (l1 && l2) {
+         // If status differs, pass > fail
+         const pass1 = l1.includes("ناجح");
+         const pass2 = l2.includes("ناجح");
+         if (pass1 && !pass2) bestTerm = l1;
+         else if (!pass1 && pass2) bestTerm = l2;
+         else bestTerm = l1; // Default
+      }
+
+      return { totalScore, maxScore, percentage, isPass, grade, bestTerm, isFullYear };
     }
 
-    async function search() {
+    function render(data) {
+      const metrics = calculateMetrics(data);
+      
+      // Update Text
+      document.getElementById("stuName").textContent = data.student_name || "—";
+      document.getElementById("stuSeat").textContent = data.seat_no || "—";
+      document.getElementById("stuSchool").textContent = data.school_name || "—";
+      document.getElementById("stuGrade").textContent = data.grade_name || "—";
+      
+      // Stats
+      document.getElementById("totalScore").textContent = `${metrics.totalScore} / ${metrics.maxScore}`;
+      document.getElementById("percentScore").textContent = `${metrics.percentage}%`;
+      
+      // Grade & Status
+      document.getElementById("gradeText").textContent = metrics.grade;
+      document.getElementById("termResult").textContent = metrics.bestTerm;
+      
+      // Badge & Status
+      const status = getStatus(metrics.isPass);
+      const badge = document.getElementById("statusBadge");
+      badge.textContent = status.text;
+      badge.className = `badge ${status.class}`;
+      
+      // Icon
+      const icon = document.getElementById("gradeIcon");
+      if(metrics.grade === "ممتاز") icon.textContent = "🏆";
+      else if(metrics.grade === "جيد جداً") icon.textContent = "🥇";
+      else if(metrics.isPass) icon.textContent = "✅";
+      else icon.textContent = "⚠️";
+
+      // Terms
+      document.getElementById("term1Display").textContent = data.level1 || "غير متوفر";
+      document.getElementById("term2Display").textContent = data.level2 || "غير متوفر";
+
+      // Table
+      const tbody = document.getElementById("subjectsBody");
+      const subjects = [
+        {n: "اللغة العربية", s: data.ar, m: 40},
+        {n: "اللغة الإنجليزية", s: data.en, m: 30},
+        {n: "الدراسات", s: data.studies, m: 20},
+        {n: "الجبر", s: data.algebra, m: 15},
+        {n: "الهندسة", s: data.geometry, m: 15},
+        {n: "الرياضيات", s: data.math_total, m: 30},
+        {n: "العلوم", s: data.science, m: 20}
+      ];
+
+      tbody.innerHTML = subjects.map(sub => {
+        const s = parseFloat(sub.s) || 0;
+        const m = parseFloat(sub.m) || 1;
+        const p = (s/m)*100;
+        const g = calcGrade(p);
+        return `<tr>
+          <td>${sub.n}</td>
+          <td><strong>${sub.s}</strong></td>
+          <td>${sub.m}</td>
+          <td><span style="background:#f1f5f9; padding:2px 8px; border-radius:4px; font-size:0.8rem;">${g}</span></td>
+        </tr>`;
+      }).join("");
+
+      // Show Card
+      resultCard.style.display = "block";
+      resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    async function handleSearch() {
       const seat = seatInput.value.trim();
       if (!seat) {
-        statusText.textContent = "أدخل رقم الجلوس!";
-        statusText.style.color = "#f87171";
-        searchWrapper.classList.add("shake-element");
-        setTimeout(() => searchWrapper.classList.remove("shake-element"), 500);
+        statusMsg.textContent = "الرجاء إدخال رقم الجلوس";
+        statusMsg.style.color = "#f87171";
         return;
       }
-      
-      btnText.style.display = "none";
-      loader.style.display = "inline-block";
-      statusText.textContent = "جاري البحث...";
-      statusText.style.color = "#fff";
 
-      const data = await getData(seat);
-      
-      loader.style.display = "none";
-      btnText.style.display = "inline";
+      // UI Loading
+      searchBtn.disabled = true;
+      loader.style.display = "inline-block";
+      statusMsg.textContent = "جاري البحث...";
+      statusMsg.style.color = "#fff";
+      resultCard.style.display = "none";
+
+      const data = await fetchResult(seat);
+
+      // Reset UI
       searchBtn.disabled = false;
+      loader.style.display = "none";
 
       if (data) {
-        statusText.textContent = "تم العثور على النتيجة";
-        statusText.style.color = "#4ade80";
         render(data);
+        statusMsg.textContent = "";
       } else {
-        statusText.textContent = "رقم الجلوس غير صحيح";
-        statusText.style.color = "#f87171";
-        resultSection.style.display = "none";
-        emptyState.style.display = "block";
+        statusMsg.textContent = "رقم الجلوس غير صحيح أو غير موجود";
+        statusMsg.style.color = "#f87171";
       }
+    }
+
+    function shareResult() {
+      const name = document.getElementById("stuName").textContent;
+      const total = document.getElementById("totalScore").textContent;
+      const grade = document.getElementById("gradeText").textContent;
+      const text = `🎓 نتيجة الطالب:\nالاسم: ${name}\nالمجموع: ${total}\nالتقدير: ${grade}\nرابط: https://mohamednasr5.github.io/natega/`;
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
     }
 
     // Events
-    searchBtn.addEventListener("click", () => { searchBtn.disabled = true; search(); });
-    seatInput.addEventListener("keydown", e => { if(e.key === "Enter") search(); });
-    
-    document.getElementById("printBtn").addEventListener("click", () => window.print());
-    document.getElementById("whatsappBtn").addEventListener("click", () => {
-      if(!currentStudent) return;
-      const t = `نتيجة الطالب:\nالاسم: ${currentStudent.student_name}\nالمجموع: ${currentStudent.percentage}%\nرابط: https://mohamednasr5.github.io/natega/`;
-      window.open(`https://wa.me/?text=${encodeURIComponent(t)}`, "_blank");
-    });
+    searchBtn.addEventListener("click", handleSearch);
+    seatInput.addEventListener("keydown", (e) => { if(e.key === "Enter") handleSearch(); });
 
-    // Check URL
+    // Check URL param
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get("seat")) {
-      seatInput.value = urlParams.get("seat");
-      search();
+    const seatParam = urlParams.get("seat");
+    if(seatParam) {
+      seatInput.value = seatParam;
+      handleSearch();
     }
   </script>
 </body>
